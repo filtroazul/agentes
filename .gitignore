@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Segredos — NUNCA commitar
+.streamlit/secrets.toml
+.env
+
+# Claude Code (config local da máquina)
+.claude/settings.local.json
+
+# SO
+Thumbs.db
+desktop.ini
