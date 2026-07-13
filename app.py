@@ -368,7 +368,13 @@ if pergunta:
             try:
                 resposta = agent.responder(api_key, cfg_exec, historico)
             except Exception as e:
-                resposta = f"⚠️ Erro ao chamar o modelo: {e}"
+                if MODO_DEMO:
+                    resposta = (
+                        "⚠️ O assistente está temporariamente indisponível. "
+                        "Tente de novo em instantes."
+                    )
+                else:
+                    resposta = f"⚠️ Erro ao chamar o modelo: {e}"
         renderizar_mensagem(resposta)
 
     historico.append({"role": "assistant", "content": resposta})
