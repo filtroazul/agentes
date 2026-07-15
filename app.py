@@ -6,6 +6,7 @@ Rodar com:  streamlit run app.py
 import html
 import os
 import re
+from urllib.parse import quote
 
 import streamlit as st
 
@@ -13,16 +14,52 @@ from core import agent, config, tools
 
 # --- modo demo (link pro cliente) vs modo admin -------------------------------
 # ?agente=corretor_imoveis  -> abre direto no chat, sem sidebar de administração
-# &corretor=Fulano          -> personaliza o nome do corretor sem editar o yaml
+# &nome=Fulano (ou corretor=) -> personaliza o nome do profissional sem editar o yaml
 
 _params = st.query_params
 MODO_DEMO = "agente" in _params
 AGENTE_DEMO = _params.get("agente", "")
-NOME_CORRETOR = (_params.get("corretor", "") or "").strip() or "Ricardo Almeida"
+NOME_PROFISSIONAL = (
+    (_params.get("nome", "") or _params.get("corretor", "") or "").strip()
+    or "Ricardo Almeida"
+)
+
+# --- ícones SVG (traço fino, sem emoji) ----------------------------------------
+
+_SVG_ATTRS = (
+    "xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' "
+    "stroke='{cor}' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'"
+)
+
+def _svg(paths: str, cor: str, tamanho: int = 20) -> str:
+    attrs = _SVG_ATTRS.format(cor=cor)
+    return f"<svg {attrs} width='{tamanho}' height='{tamanho}'>{paths}</svg>"
+
+def _svg_uri(paths: str, cor: str) -> str:
+    return "data:image/svg+xml;utf8," + quote(_svg(paths, cor, 26))
+
+_PATHS_ATENDENTE = (
+    "<path d='M4 13a8 8 0 0 1 16 0'/>"
+    "<rect x='2.5' y='13' width='4.5' height='6.5' rx='2'/>"
+    "<rect x='17' y='13' width='4.5' height='6.5' rx='2'/>"
+    "<path d='M20 19.5v1a2 2 0 0 1-2 2h-4'/>"
+)
+_PATHS_PESSOA = (
+    "<circle cx='12' cy='8' r='4'/>"
+    "<path d='M4 21c0-4.2 3.6-6.8 8-6.8s8 2.6 8 6.8'/>"
+)
+_PATHS_PRANCHETA = (
+    "<rect x='8' y='2.5' width='8' height='4' rx='1'/>"
+    "<path d='M16 4.5h2a2 2 0 0 1 2 2V19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2h2'/>"
+    "<path d='M9 12h6'/><path d='M9 16h4'/>"
+)
+
+AVATAR_ASSISTENTE = _svg_uri(_PATHS_ATENDENTE, "#E8985E")
+AVATAR_PESSOA = _svg_uri(_PATHS_PESSOA, "#9BA3B2")
 
 st.set_page_config(
-    page_title="Assistente Imobiliário" if MODO_DEMO else "Plataforma de Agentes",
-    page_icon="🏠" if MODO_DEMO else "✦",
+    page_title=f"Atendimento — {NOME_PROFISSIONAL}" if MODO_DEMO else "Plataforma de Agentes",
+    page_icon=AVATAR_ASSISTENTE if MODO_DEMO else "✦",
     layout="centered" if MODO_DEMO else "wide",
     initial_sidebar_state="collapsed" if MODO_DEMO else "auto",
 )
@@ -82,6 +119,15 @@ st.markdown(
         color: #F3EFE6;
     }
     .agent-card .desc { color: #9BA3B2; margin-top: 2px; }
+    .agent-card.demo { display: flex; align-items: center; gap: 16px; }
+    .icone-tile {
+        flex: 0 0 48px;
+        width: 48px; height: 48px;
+        border-radius: 13px;
+        background: #241C14;
+        border: 1px solid #7A5636;
+        display: flex; align-items: center; justify-content: center;
+    }
 
     /* chips de metadados */
     .chip {
@@ -140,7 +186,9 @@ st.markdown(
         font-weight: 700;
         font-size: 1.05rem;
         color: #6FD79E;
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 8px;
         margin-bottom: 0.4rem;
         border-bottom: 1px solid #2A4A38;
         padding-bottom: 0.4rem;
@@ -170,12 +218,12 @@ if MODO_DEMO:
 # --- renderização de mensagens -------------------------------------------------
 
 RE_RESUMO = re.compile(
-    r"-{3,}\s*\n\s*(📋\s*RESUMO PARA O CORRETOR.*?)(?:\n\s*-{3,}|\Z)", re.DOTALL
+    r"-{3,}\s*\n\s*((?:📋\s*)?RESUMO[^\n]*.*?)(?:\n\s*-{3,}|\Z)", re.DOTALL
 )
 
 
 def renderizar_mensagem(texto: str) -> None:
-    """Markdown normal, mas o bloco 📋 RESUMO vira um card destacado."""
+    """Markdown normal, mas o bloco RESUMO vira um card destacado."""
     m = RE_RESUMO.search(texto)
     if not m:
         st.markdown(texto)
@@ -186,10 +234,12 @@ def renderizar_mensagem(texto: str) -> None:
         st.markdown(antes)
 
     linhas = [l.strip() for l in m.group(1).strip().splitlines() if l.strip()]
-    titulo = html.escape(linhas[0]) if linhas else "📋 RESUMO PARA O CORRETOR"
+    titulo_txt = re.sub(r"^📋\s*", "", linhas[0]) if linhas else "RESUMO DO LEAD"
+    icone_titulo = _svg(_PATHS_PRANCHETA, "#6FD79E", 18)
     corpo = "<br>".join(html.escape(l) for l in linhas[1:])
     st.markdown(
-        f'<div class="resumo-card"><span class="titulo">{titulo}</span>{corpo}</div>',
+        f'<div class="resumo-card">'
+        f'<span class="titulo">{icone_titulo}{html.escape(titulo_txt)}</span>{corpo}</div>',
         unsafe_allow_html=True,
     )
 
@@ -308,20 +358,37 @@ if not selecionado:
 cfg = agentes[selecionado]
 icone = cfg.get("icone", "🤖")
 
+
+def personalizar(texto: str) -> str:
+    """Substitui os placeholders de nome sem alterar o agents.yaml."""
+    return texto.replace("[NOME DO CORRETOR]", NOME_PROFISSIONAL).replace(
+        "[NOME]", NOME_PROFISSIONAL
+    )
+
+
 if MODO_DEMO:
-    # Cabeçalho limpo pro cliente: sem modelo, temperatura ou jargão técnico
+    # Cabeçalho limpo pro cliente: sem modelo, temperatura ou jargão técnico.
+    # Título/subtítulo vêm do yaml do agente (qualquer ramo), com fallback genérico.
+    titulo_demo = personalizar(cfg.get("titulo_demo") or "Assistente de [NOME]")
+    subtitulo_demo = personalizar(
+        cfg.get("subtitulo_demo")
+        or "Atendimento imediato, a qualquer hora. Conte o que você procura."
+    )
     st.markdown(
         f"""
-        <div class="agent-card">
-            <div class="nome">🏠 Assistente do corretor {html.escape(NOME_CORRETOR)}</div>
-            <div class="desc">Atendimento imediato, a qualquer hora — me conta o que você procura 😊</div>
+        <div class="agent-card demo">
+            <div class="icone-tile">{_svg(_PATHS_ATENDENTE, "#E8985E", 24)}</div>
+            <div>
+                <div class="nome">{html.escape(titulo_demo)}</div>
+                <div class="desc">{html.escape(subtitulo_demo)}</div>
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 else:
     ferramentas_html = "".join(
-        f'<span class="chip">🔧 {f}</span>' for f in cfg.get("ferramentas", [])
+        f'<span class="chip">{f}</span>' for f in cfg.get("ferramentas", [])
     )
     st.markdown(
         f"""
@@ -329,8 +396,8 @@ else:
             <div class="nome">{icone} {selecionado.replace('_', ' ').title()}</div>
             <div class="desc">{cfg.get('descricao', '')}</div>
             <div>
-                <span class="chip accent">⚡ {cfg.get('modelo', '')}</span>
-                <span class="chip">🌡️ {cfg.get('temperatura', 0.7)}</span>
+                <span class="chip accent">{cfg.get('modelo', '')}</span>
+                <span class="chip">temp {cfg.get('temperatura', 0.7)}</span>
                 {ferramentas_html}
             </div>
         </div>
@@ -340,8 +407,10 @@ else:
 
 historico = st.session_state.historicos.setdefault(selecionado, [])
 
+avatar_assistente = AVATAR_ASSISTENTE if MODO_DEMO else icone
+
 for msg in historico:
-    avatar = icone if msg["role"] == "assistant" else "🧑"
+    avatar = avatar_assistente if msg["role"] == "assistant" else AVATAR_PESSOA
     with st.chat_message(msg["role"], avatar=avatar):
         renderizar_mensagem(msg["content"])
 
@@ -350,31 +419,31 @@ pergunta = st.chat_input("Digite sua mensagem...")
 if pergunta:
     if not api_key:
         if MODO_DEMO:
-            st.error("⚠️ O assistente está temporariamente indisponível. Tente de novo em instantes.")
+            st.error("O assistente está temporariamente indisponível. Tente de novo em instantes.")
         else:
             st.error("Informe sua chave da API Groq na barra lateral (é gratuita).")
         st.stop()
 
     historico.append({"role": "user", "content": pergunta})
-    with st.chat_message("user", avatar="🧑"):
+    with st.chat_message("user", avatar=AVATAR_PESSOA):
         st.markdown(pergunta)
 
-    # personaliza o nome do corretor no prompt sem alterar o agents.yaml
+    # personaliza o nome do profissional no prompt sem alterar o agents.yaml
     cfg_exec = dict(cfg)
-    cfg_exec["prompt"] = cfg.get("prompt", "").replace("[NOME DO CORRETOR]", NOME_CORRETOR)
+    cfg_exec["prompt"] = personalizar(cfg.get("prompt", ""))
 
-    with st.chat_message("assistant", avatar=icone):
+    with st.chat_message("assistant", avatar=avatar_assistente):
         with st.spinner("Pensando..."):
             try:
                 resposta = agent.responder(api_key, cfg_exec, historico)
             except Exception as e:
                 if MODO_DEMO:
                     resposta = (
-                        "⚠️ O assistente está temporariamente indisponível. "
+                        "O assistente está temporariamente indisponível. "
                         "Tente de novo em instantes."
                     )
                 else:
-                    resposta = f"⚠️ Erro ao chamar o modelo: {e}"
+                    resposta = f"Erro ao chamar o modelo: {e}"
         renderizar_mensagem(resposta)
 
     historico.append({"role": "assistant", "content": resposta})
