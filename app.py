@@ -124,9 +124,48 @@ st.markdown(
         flex: 0 0 48px;
         width: 48px; height: 48px;
         border-radius: 13px;
-        background: #241C14;
+        background: linear-gradient(160deg, #2B2015 0%, #241C14 100%);
         border: 1px solid #7A5636;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
         display: flex; align-items: center; justify-content: center;
+    }
+
+    /* modo demo: moldura dupla (card dentro de card) + entrada suave */
+    .demo-shell {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 22px;
+        padding: 6px;
+        margin-bottom: 1.1rem;
+        box-shadow: 0 18px 48px rgba(8, 10, 14, 0.45);
+        animation: demo-entrada 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .demo-shell .agent-card.demo {
+        margin-bottom: 0;
+        border-radius: 16px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    @keyframes demo-entrada {
+        from { opacity: 0; transform: translateY(14px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .status-pill {
+        display: inline-flex; align-items: center; gap: 7px;
+        margin-top: 9px; padding: 3px 12px;
+        border-radius: 999px;
+        font-size: 0.72rem; font-weight: 500;
+        color: #7ED9A7;
+        background: rgba(62, 156, 107, 0.12);
+        border: 1px solid rgba(62, 156, 107, 0.35);
+    }
+    .status-pill .dot {
+        width: 7px; height: 7px; border-radius: 999px;
+        background: #57C98A;
+        animation: pulso 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+    }
+    @keyframes pulso {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50%      { opacity: 0.45; transform: scale(0.8); }
     }
 
     /* chips de metadados */
@@ -157,6 +196,12 @@ st.markdown(
     [data-testid="stChatInput"] {
         border-radius: 14px;
         border: 1px solid #2A3040;
+        transition: border-color 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+                    box-shadow 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    [data-testid="stChatInput"]:focus-within {
+        border-color: #E8985E;
+        box-shadow: 0 0 0 1px rgba(232, 152, 94, 0.3);
     }
 
     /* botões */
@@ -376,11 +421,14 @@ if MODO_DEMO:
     )
     st.markdown(
         f"""
-        <div class="agent-card demo">
-            <div class="icone-tile">{_svg(_PATHS_ATENDENTE, "#E8985E", 24)}</div>
-            <div>
-                <div class="nome">{html.escape(titulo_demo)}</div>
-                <div class="desc">{html.escape(subtitulo_demo)}</div>
+        <div class="demo-shell">
+            <div class="agent-card demo">
+                <div class="icone-tile">{_svg(_PATHS_ATENDENTE, "#E8985E", 24)}</div>
+                <div>
+                    <div class="nome">{html.escape(titulo_demo)}</div>
+                    <div class="desc">{html.escape(subtitulo_demo)}</div>
+                    <div class="status-pill"><span class="dot"></span>Online agora · resposta em segundos</div>
+                </div>
             </div>
         </div>
         """,
