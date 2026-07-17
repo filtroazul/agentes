@@ -5,28 +5,30 @@
 
 **Status possíveis:** `a contatar` → `msg enviada` → `respondeu` → `vídeo enviado` → `piloto` → `cliente 💰` (ou `frio` após 2 tentativas sem resposta)
 
-| # | Nome | Canal (FB/Insta/OLX/Maps) | WhatsApp/contato | 1º contato | Follow-up | Status | Obs |
-|---|------|---------------------------|------------------|-----------|-----------|--------|-----|
-| 1 | | | | | | a contatar | |
-| 2 | | | | | | a contatar | |
-| 3 | | | | | | a contatar | |
-| 4 | | | | | | a contatar | |
-| 5 | | | | | | a contatar | |
-| 6 | | | | | | a contatar | |
-| 7 | | | | | | a contatar | |
-| 8 | | | | | | a contatar | |
-| 9 | | | | | | a contatar | |
-| 10 | | | | | | a contatar | |
-| 11 | | | | | | a contatar | |
-| 12 | | | | | | a contatar | |
-| 13 | | | | | | a contatar | |
-| 14 | | | | | | a contatar | |
-| 15 | | | | | | a contatar | |
-| 16 | | | | | | a contatar | |
-| 17 | | | | | | a contatar | |
-| 18 | | | | | | a contatar | |
-| 19 | | | | | | a contatar | |
-| 20 | | | | | | a contatar | |
+Alvo = **qualquer negócio local que recebe lead no WhatsApp/Instagram** (confeitaria, oficina, clínica, salão, imobiliária...). Misturar ramos na lista — o produto é genérico.
+
+| # | Nome | Ramo | Canal (FB/Insta/OLX/Maps) | WhatsApp/contato | 1º contato | Follow-up | Status | Obs |
+|---|------|------|---------------------------|------------------|-----------|-----------|--------|-----|
+| 1 | | | | | | | a contatar | |
+| 2 | | | | | | | a contatar | |
+| 3 | | | | | | | a contatar | |
+| 4 | | | | | | | a contatar | |
+| 5 | | | | | | | a contatar | |
+| 6 | | | | | | | a contatar | |
+| 7 | | | | | | | a contatar | |
+| 8 | | | | | | | a contatar | |
+| 9 | | | | | | | a contatar | |
+| 10 | | | | | | | a contatar | |
+| 11 | | | | | | | a contatar | |
+| 12 | | | | | | | a contatar | |
+| 13 | | | | | | | a contatar | |
+| 14 | | | | | | | a contatar | |
+| 15 | | | | | | | a contatar | |
+| 16 | | | | | | | a contatar | |
+| 17 | | | | | | | a contatar | |
+| 18 | | | | | | | a contatar | |
+| 19 | | | | | | | a contatar | |
+| 20 | | | | | | | a contatar | |
 
 ## Placar do funil (atualizar toda semana)
 

@@ -1,6 +1,6 @@
-# Case — Assistente de IA para corretor de imóveis
+# Case — Assistente de IA que pega leads (esqueleto pra qualquer ramo)
 
-> Esqueleto pronto. Preencher os [COLCHETES] com dados reais durante o piloto com seu pai.
+> Esqueleto pronto. Preencher os [COLCHETES] com dados reais durante o PRIMEIRO piloto — seja com seu pai (imóveis) ou com qualquer negócio que topar primeiro. Adaptar os exemplos ao ramo.
 > Tudo aqui vira print/argumento de venda depois.
 
 ## O problema (antes)
@@ -14,8 +14,8 @@
 
 Assistente de IA no WhatsApp que:
 - Responde em **segundos**, 24h por dia, 7 dias por semana
-- Qualifica o lead: compra/aluguel, tipo, região, faixa de preço, prazo, forma de pagamento
-- Entrega resumo pronto pro corretor entrar na conversa só com quem vale a pena
+- Qualifica o lead: o que a pessoa quer, detalhes, faixa de valor, prazo, contato (no ramo imóveis: compra/aluguel, região, faixa de preço...)
+- Entrega resumo pronto pra equipe entrar na conversa só com quem vale a pena
 
 ## Os números (depois) — coletar durante o piloto
 

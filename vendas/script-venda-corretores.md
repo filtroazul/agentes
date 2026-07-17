@@ -1,6 +1,7 @@
-# Script 2 — Venda pós-case (colegas corretores)
+# Script 2 — Venda pós-case (versão nicho corretores)
 
 > Mandar SÓ depois de ter os números reais do piloto com seu pai. Preencher os [COLCHETES] antes.
+> **Obs:** o produto é genérico (lead de qualquer ramo). Este script é a versão pro nicho de corretores porque o case previsto é com seu pai. Se o 1º case sair em OUTRO ramo, usar a mesma estrutura trocando os exemplos (imóvel → o produto/serviço do ramo).
 
 ---
 

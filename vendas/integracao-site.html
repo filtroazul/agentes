@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exemplo: agente integrado no site</title>
+  <style>
+    body { margin: 0; font-family: sans-serif; }
+
+    /* ===== OPÇÃO 1: chat ocupando uma área da página ===== */
+    .chat-area {
+      max-width: 480px;
+      height: 640px;
+      margin: 40px auto;
+      border: 1px solid #ddd;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0,0,0,.12);
+    }
+    .chat-area iframe { width: 100%; height: 100%; border: 0; }
+
+    /* ===== OPÇÃO 2: botão flutuante que abre o chat (estilo WhatsApp) ===== */
+    #chat-bolha {
+      position: fixed; right: 24px; bottom: 24px;
+      width: 60px; height: 60px; border-radius: 50%;
+      border: 0; cursor: pointer;
+      background: #16a34a; color: #fff; font-size: 26px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.25);
+      z-index: 1000;
+    }
+    #chat-janela {
+      position: fixed; right: 24px; bottom: 96px;
+      width: 380px; height: 560px;
+      border: 1px solid #ddd; border-radius: 16px;
+      overflow: hidden; display: none;
+      box-shadow: 0 12px 40px rgba(0,0,0,.25);
+      background: #fff; z-index: 1000;
+    }
+    #chat-janela.aberto { display: block; }
+    #chat-janela iframe { width: 100%; height: 100%; border: 0; }
+    @media (max-width: 480px) {
+      #chat-janela { right: 8px; left: 8px; width: auto; height: 70vh; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1 style="text-align:center; margin-top:32px;">Seu site aqui</h1>
+
+  <!-- OPÇÃO 1: incorporado direto na página -->
+  <div class="chat-area">
+    <iframe
+      src="https://agentes-s68ksrzb97z5q4qqp7f8nq.streamlit.app/?agente=atendimento&embed=true"
+      title="Assistente de atendimento"
+      loading="lazy"></iframe>
+  </div>
+
+  <!-- OPÇÃO 2: botão flutuante no canto (pode usar as duas juntas ou só uma) -->
+  <button id="chat-bolha" aria-label="Abrir chat">💬</button>
+  <div id="chat-janela">
+    <iframe
+      src="https://agentes-s68ksrzb97z5q4qqp7f8nq.streamlit.app/?agente=atendimento&embed=true"
+      title="Assistente de atendimento"
+      loading="lazy"></iframe>
+  </div>
+
+  <script>
+    const bolha = document.getElementById('chat-bolha');
+    const janela = document.getElementById('chat-janela');
+    bolha.addEventListener('click', () => {
+      janela.classList.toggle('aberto');
+      bolha.textContent = janela.classList.contains('aberto') ? '✕' : '💬';
+    });
+  </script>
+
+</body>
+</html>
