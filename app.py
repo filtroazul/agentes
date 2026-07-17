@@ -19,10 +19,8 @@ from core import agent, config, tools
 _params = st.query_params
 MODO_DEMO = "agente" in _params
 AGENTE_DEMO = _params.get("agente", "")
-NOME_PROFISSIONAL = (
-    (_params.get("nome", "") or _params.get("corretor", "") or "").strip()
-    or "Ricardo Almeida"
-)
+_NOME_PARAM = (_params.get("nome", "") or _params.get("corretor", "") or "").strip()
+NOME_PROFISSIONAL = _NOME_PARAM or "Ricardo Almeida"
 
 # --- ícones SVG (traço fino, sem emoji) ----------------------------------------
 
@@ -58,7 +56,9 @@ AVATAR_ASSISTENTE = _svg_uri(_PATHS_ATENDENTE, "#E8985E")
 AVATAR_PESSOA = _svg_uri(_PATHS_PESSOA, "#9BA3B2")
 
 st.set_page_config(
-    page_title=f"Atendimento — {NOME_PROFISSIONAL}" if MODO_DEMO else "Plataforma de Agentes",
+    page_title=(f"Atendimento — {_NOME_PARAM}" if _NOME_PARAM else "Atendimento")
+    if MODO_DEMO
+    else "Plataforma de Agentes",
     page_icon=AVATAR_ASSISTENTE if MODO_DEMO else "✦",
     layout="centered" if MODO_DEMO else "wide",
     initial_sidebar_state="collapsed" if MODO_DEMO else "auto",
