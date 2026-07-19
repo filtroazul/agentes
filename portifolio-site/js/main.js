@@ -9,9 +9,11 @@ const $ = (s, el = document) => el.querySelector(s);
 const iconUrl = (icon) => `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${icon}.svg`;
 
 /* ===== preenche textos do perfil ===== */
-$("#hero-usuario").textContent = `// @${PERFIL.usuario} — ${PERFIL.titulo}_`;
-$("#hero-bio").textContent = PERFIL.bio;
-$("#hero-tags").innerHTML = SKILLS.slice(0, 6).map((s) => `<span>${s.nome}</span>`).join("");
+/* chips do hero usam o símbolo puro da linguagem (sem moldura), via Simple Icons */
+const CHIP_ICON = { JavaScript: "javascript", TypeScript: "typescript", React: "react", "Node.js": "nodedotjs", Python: "python", HTML: "html5" };
+$("#hero-tags").innerHTML = SKILLS.slice(0, 6).map((s) =>
+  `<span><img src="https://cdn.simpleicons.org/${CHIP_ICON[s.nome] || s.nome.toLowerCase()}/${s.cor.slice(1)}" alt="" loading="lazy" decoding="async" />${s.nome}</span>`).join("");
+$("#link-cv").href = PERFIL.cv;
 
 $("#cracha-nome").textContent = PERFIL.nome;
 $("#cracha-titulo").textContent = PERFIL.titulo;
@@ -26,6 +28,28 @@ $("#sociais").innerHTML = [
   ["E-mail", `mailto:${PERFIL.email}`],
 ].map(([nome, url]) => `<a href="${url}" target="_blank" rel="noopener">${nome} ↗</a>`).join("");
 $("#ano").textContent = new Date().getFullYear();
+
+/* ===== efeito de digitação no hero (escreve, apaga, próxima frase) ===== */
+const typeEl = $("#type-text");
+let fraseAtual = 0, charAtual = 0, apagando = false;
+
+function digita() {
+  const frase = PERFIL.frases[fraseAtual];
+  charAtual += apagando ? -1 : 1;
+  typeEl.textContent = frase.slice(0, charAtual);
+
+  let espera = apagando ? 38 : 72;                 // apagar é mais rápido que escrever
+  if (!apagando && charAtual === frase.length) {
+    espera = 2100;                                  // pausa com a frase completa
+    apagando = true;
+  } else if (apagando && charAtual === 0) {
+    apagando = false;
+    fraseAtual = (fraseAtual + 1) % PERFIL.frases.length;
+    espera = 420;                                   // respiro antes da próxima
+  }
+  setTimeout(digita, espera);
+}
+digita();
 
 /* =========================================================
    TECLADO 3D DE SKILLS
@@ -90,61 +114,75 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* =========================================================
-   CRACHÁ — física de pêndulo + arrastar
+   CRACHÁ — física elástica realista
+   O cartão é um corpo com massa pendurado numa fita-mola:
+   dá pra puxar em QUALQUER direção, a fita estica e ele
+   volta quicando, com balanço angular próprio.
    ========================================================= */
 const lanyard = $("#lanyard");
-let angulo = 0, vel = 0, alvo = null, t0 = performance.now();
+const strapArm = $("#strap-arm");
+const crachaArm = $("#cracha-arm");
 
-function pivot() {
-  const r = lanyard.getBoundingClientRect();
-  // com rotação aplicada o rect muda; usa o centro-x e o topo aproximado
-  return { x: r.left + r.width / 2, y: r.top };
-}
+let px = 0, py = 0, vx = 0, vy = 0;      // posição/velocidade do cartão
+let ang = 0, angV = 0;                    // rotação própria do cartão
+let arrasto = null;                       // {x0, y0, px0, py0} durante o drag
+let t0 = performance.now();
 
 lanyard.addEventListener("pointerdown", (e) => {
   lanyard.setPointerCapture(e.pointerId);
-  alvo = e;
+  arrasto = { x0: e.clientX, y0: e.clientY, px0: px, py0: py };
 });
-lanyard.addEventListener("pointermove", (e) => { if (alvo) alvo = e; });
+lanyard.addEventListener("pointermove", (e) => {
+  if (arrasto) { arrasto.x = e.clientX; arrasto.y = e.clientY; }
+});
 ["pointerup", "pointercancel"].forEach((ev) =>
-  lanyard.addEventListener(ev, () => { alvo = null; })
+  lanyard.addEventListener(ev, () => { arrasto = null; })
 );
 
 /* pausa a física quando o crachá sai da tela (economia de bateria) */
 let crachaVisivel = true;
 new IntersectionObserver(([e]) => (crachaVisivel = e.isIntersecting)).observe(lanyard);
 
-/* rolar a página dá um empurrãozinho no crachá */
+/* rolar a página faz o crachá quicar na vertical */
 let ultimoScroll = window.scrollY;
 window.addEventListener("scroll", () => {
-  vel += (window.scrollY - ultimoScroll) * 0.08;
+  vy += (window.scrollY - ultimoScroll) * 0.35;
   ultimoScroll = window.scrollY;
 }, { passive: true });
 
 function fisica(now) {
-  const dt = Math.min((now - t0) / 1000, 0.05);
+  const dt = Math.min((now - t0) / 1000, 0.04);
   t0 = now;
 
-  if (!crachaVisivel && !alvo) { requestAnimationFrame(fisica); return; }
+  if (!crachaVisivel && !arrasto) { requestAnimationFrame(fisica); return; }
 
-  if (alvo) {
-    // segue o dedo com mola mole: atrasa, passa do ponto e rebola
-    const p = pivot();
-    const desejado = Math.atan2(alvo.clientX - p.x, Math.max(alvo.clientY - p.y, 40)) * (180 / Math.PI);
-    vel += ((desejado - angulo) * 46 - vel * 5) * dt;
+  if (arrasto && arrasto.x !== undefined) {
+    // o cartão persegue o dedo com uma mola firme (sensação de peso)
+    const txAlvo = arrasto.px0 + (arrasto.x - arrasto.x0);
+    const tyAlvo = arrasto.py0 + (arrasto.y - arrasto.y0);
+    vx += ((txAlvo - px) * 320 - vx * 26) * dt;
+    vy += ((tyAlvo - py) * 320 - vy * 26) * dt;
   } else {
-    // mola fraca + pouco atrito = balança bastante antes de parar
-    vel += (-9 * angulo - 0.9 * vel) * dt;
-    vel += Math.sin(now / 1300) * 1.4 * dt; // brisa constante
+    // solto: mola elástica puxa de volta pro repouso, com pouco atrito
+    vx += (-px * 70 - vx * 4.5) * dt;
+    vy += (-py * 90 - vy * 5.5) * dt;
+    vx += Math.sin(now / 1300) * 2.2 * dt; // brisa constante
   }
-  angulo += vel * dt;
+  px += vx * dt;
+  py += vy * dt;
 
-  // bateu no limite? quica de volta
-  if (angulo > 70 || angulo < -70) {
-    angulo = Math.max(-70, Math.min(70, angulo));
-    vel *= -0.35;
-  }
-  gsap.set(lanyard, { rotation: angulo });
+  // a fita estica: aponta e escala do topo até o furo do cartão
+  const L = strapArm.offsetHeight || 200;
+  const dx = px, dy = L + py;
+  const rot = Math.atan2(-dx, Math.max(dy, 40)) * (180 / Math.PI);
+  const estica = Math.max(Math.hypot(dx, dy) / L, 0.25);
+  gsap.set(strapArm, { rotation: rot, scaleY: estica });
+
+  // o cartão tenta se alinhar com a fita, mas com atraso (rebolado)
+  angV += ((rot - ang) * 55 - angV * 5) * dt;
+  ang += angV * dt;
+  gsap.set(crachaArm, { x: px, y: py, rotation: ang });
+
   requestAnimationFrame(fisica);
 }
 requestAnimationFrame(fisica);
@@ -208,8 +246,8 @@ $("#certs-grid").innerHTML = CERTIFICADOS.map((c) => `
 /* intro do hero */
 gsap.timeline({ defaults: { ease: "power3.out" } })
   .from(".hero-titulo .linha", { opacity: 0, y: 60, stagger: 0.12, duration: 0.7 }, 0.15)
-  .from([".hero-sub", ".hero-bio", ".hero-tags", ".hero-cta"], { opacity: 0, y: 24, stagger: 0.08, duration: 0.5 }, 0.45)
-  .from(".lanyard", { y: -560, duration: 1.1, ease: "bounce.out", onComplete: () => (vel += 55) }, 0.3);
+  .from([".hero-type", ".hero-tags", ".hero-cta"], { opacity: 0, y: 24, stagger: 0.08, duration: 0.5 }, 0.45)
+  .from(".lanyard", { y: -560, duration: 1.1, ease: "bounce.out", onComplete: () => { vy += 380; vx += 60; } }, 0.3);
 
 /* fundo desloca conforme rola a página — sensação de passear pelo cenário */
 gsap.to(".bg", {
@@ -225,7 +263,7 @@ gsap.to(".bg-grid", {
 
 /* SKILLS: seção fica presa e o teclado entra com scrub */
 const keys = gsap.utils.toArray(".key");
-gsap.set(".keyboard", { rotateX: 58, rotateZ: -40 });
+gsap.set(".keyboard", { rotateX: 48, rotateZ: -38 });
 
 gsap.timeline({
   scrollTrigger: {
@@ -237,7 +275,7 @@ gsap.timeline({
   },
 })
   .fromTo(".skills .titulo-gigante", { scale: 2.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35 })
-  .fromTo(".keyboard", { rotateX: 78, rotateZ: -8, y: 260 }, { rotateX: 58, rotateZ: -40, y: 0, duration: 0.6 }, 0.1)
+  .fromTo(".keyboard", { rotateX: 72, rotateZ: -8, y: 260 }, { rotateX: 48, rotateZ: -38, y: 0, duration: 0.6 }, 0.1)
   .fromTo(keys, { z: 420, opacity: 0 }, { z: 0, opacity: 1, stagger: { each: 0.02, from: "random" }, duration: 0.45 }, 0.25)
   .fromTo(".skills-hint", { opacity: 0 }, { opacity: 1, duration: 0.15 }, 0.8);
 

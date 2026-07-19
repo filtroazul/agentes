@@ -8,7 +8,12 @@ const PERFIL = {
   titulo: "Desenvolvedor Full Stack",
   local: "Fortaleza — CE, Brasil",
   bio: "Criando websites modernos com visual limpo, responsivo e elegante. Transformo ideias e design em experiências digitais que funcionam.",
-  disponivel: "DISPONÍVEL PARA TRABALHO",
+  cv: "assets/cv-maxwell.pdf",       // ← coloque seu CV em PDF nessa pasta
+  frases: [                          // ← frases do efeito de digitação do hero
+    "Full Stack Developer",
+    "Criando softwares desde 2023",
+    "Websites modernos e responsivos",
+  ],
   email: "maxgomeix@gmail.com",          // ← confira/edite seu e-mail
   whatsapp: "5585992932642",             // ← só números, com DDI+DDD
   github: "https://github.com/Gyshro",

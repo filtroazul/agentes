@@ -92,13 +92,20 @@ img { max-width: 100%; }
   color: transparent; -webkit-text-stroke: 2px rgba(150,190,255,.9);
   text-shadow: 0 0 34px var(--glow);
 }
-.hero-sub { color: var(--accent); font-size: .95rem; margin-bottom: 16px; }
-.hero-bio { color: var(--texto-2); max-width: 46ch; line-height: 1.65; margin-bottom: 20px; }
+.hero-type {
+  color: var(--accent); font-size: clamp(.95rem, 2vw, 1.25rem);
+  min-height: 1.6em; margin-bottom: 22px; letter-spacing: .04em;
+  text-shadow: 0 0 18px var(--glow);
+}
+.type-cursor { animation: pisca 1s steps(2) infinite; margin-left: 2px; }
+@keyframes pisca { 50% { opacity: 0; } }
 .hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; }
 .hero-tags span {
+  display: inline-flex; align-items: center; gap: 7px;
   border: 1px solid var(--linha); background: rgba(13,19,34,.7);
   padding: 6px 12px; border-radius: 6px; font-size: .74rem; color: var(--texto-2);
 }
+.hero-tags img { width: 15px; height: 15px; }
 .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; }
 .btn {
   font-family: "JetBrains Mono", monospace; font-size: .82rem; letter-spacing: .04em;
@@ -125,11 +132,19 @@ img { max-width: 100%; }
 .lanyard {
   position: absolute; top: -110px;
   display: flex; flex-direction: column; align-items: center;
-  transform-origin: top center;
-  will-change: transform;
   cursor: grab; user-select: none; touch-action: none;
 }
 .lanyard:active { cursor: grabbing; }
+.strap-arm {
+  display: flex; justify-content: center;
+  transform-origin: top center;
+  will-change: transform;
+}
+.cracha-arm {
+  display: flex; flex-direction: column; align-items: center;
+  transform-origin: top center;
+  will-change: transform;
+}
 .strap {
   width: 46px; height: clamp(150px, 26vh, 240px);
   background: linear-gradient(90deg, #0a1226, #1b2a4e 45%, #0a1226);
@@ -229,7 +244,7 @@ img { max-width: 100%; }
   grid-template-columns: repeat(5, var(--key-size));
   gap: 16px;
   transform-style: preserve-3d;
-  transform: rotateX(58deg) rotateZ(-40deg);
+  transform: rotateX(48deg) rotateZ(-38deg);
 }
 .key {
   position: relative;
@@ -387,7 +402,6 @@ img { max-width: 100%; }
   .nav-links a:not(:nth-child(-n+3)) { display: none; }
 
   .hero { grid-template-columns: 1fr; padding: 84px 18px 70px; text-align: center; gap: 0; }
-  .hero-bio { margin-inline: auto; }
   .hero-tags, .hero-cta { justify-content: center; }
 
   .lanyard-area { height: 470px; order: -1; margin: 0 0 34px; }
