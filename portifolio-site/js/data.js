@@ -54,6 +54,16 @@ const SKILLS = [
    --------------------------------------------------------- */
 const PROJETOS = [
   {
+    titulo: "Monitoramento AIOTI Soluções",
+    desc: "Vídeo conceito da plataforma de monitoramento da AIOTI Soluções Industriais, empresa onde atuo: um dashboard para os clientes acompanharem seus equipamentos.",
+    categoria: "UI/UX",
+    stack: ["Dashboard", "Vídeo conceito", "Product Design"],
+    cor: "#35c24a",
+    capa: "assets/projetos/aioti.jpg",
+    link: "https://www.instagram.com/p/DZiFYkshQmZ/",
+    repo: "",
+  },
+  {
     titulo: "Agente de Atendimento com IA",
     desc: "Chatbot que qualifica leads automaticamente, faz perguntas objetivas e envia o resultado por Telegram e planilha Google.",
     categoria: "Python",

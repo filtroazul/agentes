@@ -201,7 +201,10 @@ function renderProjetos(cat) {
   const lista = cat === "Todos" ? PROJETOS : PROJETOS.filter((p) => p.categoria === cat);
   grid.innerHTML = lista.map((p) => `
     <article class="card" style="--c:${p.cor}">
-      <div class="card-capa"><span class="card-cat">${p.categoria}</span></div>
+      <div class="card-capa">
+        ${p.capa ? `<img src="${p.capa}" alt="${p.titulo}" loading="lazy" decoding="async" />` : ""}
+        <span class="card-cat">${p.categoria}</span>
+      </div>
       <div class="card-corpo">
         <h3>${p.titulo}</h3>
         <p>${p.desc}</p>
