@@ -98,9 +98,9 @@ img { max-width: 100%; }
   text-shadow: 0 0 34px var(--glow);
 }
 .hero-type {
-  color: var(--accent); font-size: clamp(.95rem, 2vw, 1.25rem);
+  color: #fff; font-size: clamp(.95rem, 2vw, 1.25rem);
   min-height: 1.6em; margin-bottom: 22px; letter-spacing: .04em;
-  text-shadow: 0 0 18px var(--glow);
+  text-shadow: 0 0 18px rgba(255,255,255,.35);
 }
 .type-cursor { animation: pisca 1s steps(2) infinite; margin-left: 2px; }
 @keyframes pisca { 50% { opacity: 0; } }
@@ -207,9 +207,16 @@ img { max-width: 100%; }
   font-size: clamp(3.4rem, 12vw, 9.5rem);
   text-transform: uppercase; text-align: center; line-height: .95;
   letter-spacing: .02em;
-  background: linear-gradient(#f4f8ff, #6fa5f0);
+  background: linear-gradient(#ffffff, #7fb0f5);
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  text-shadow: 0 10px 30px rgba(0,0,0,.55), 0 0 46px var(--glow);
+  position: relative;
+}
+/* o glow fica numa cópia do texto ATRÁS do título: brilha sem apagar as letras */
+.titulo-gigante[data-text]::after {
+  content: attr(data-text);
+  position: absolute; inset: 0; z-index: -1;
+  color: transparent; background: none;
+  text-shadow: 0 0 34px rgba(120,180,255,.55), 0 0 80px var(--glow), 0 0 140px rgba(77,163,255,.35);
 }
 
 /* ===== skills / teclado ===== */
@@ -369,12 +376,11 @@ img { max-width: 100%; }
 }
 .cert:hover { transform: translateY(-4px); border-color: rgba(77,163,255,.45); box-shadow: 0 0 30px rgba(77,163,255,.12); }
 .cert-logo {
-  flex: 0 0 58px; height: 58px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  background: color-mix(in srgb, var(--c) 22%, #101014);
-  border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
+  flex: 0 0 52px;
+  display: flex; align-items: flex-start; justify-content: center;
+  padding-top: 4px;
 }
-.cert-logo img { width: 34px; height: 34px; }
+.cert-logo img { width: 44px; height: 44px; filter: drop-shadow(0 0 10px color-mix(in srgb, var(--c) 55%, transparent)); }
 .cert-corpo { display: flex; flex-direction: column; flex: 1; }
 .cert-corpo h3 {
   font-size: 1.15rem; font-weight: 700; margin-bottom: 4px;
@@ -391,14 +397,14 @@ img { max-width: 100%; }
   font-family: "JetBrains Mono", monospace; font-size: .74rem; font-weight: 700;
   padding: 8px 16px; border-radius: 8px;
   color: #e7f1ff;
-  background: color-mix(in srgb, var(--c) 26%, transparent);
-  border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
-  text-shadow: 0 0 12px color-mix(in srgb, var(--c) 80%, transparent);
+  background: rgba(77,163,255,.18);
+  border: 1px solid rgba(77,163,255,.5);
+  text-shadow: 0 0 12px var(--glow);
   transition: background .2s, box-shadow .2s;
 }
 .cert-link:hover {
-  background: color-mix(in srgb, var(--c) 40%, transparent);
-  box-shadow: 0 0 22px color-mix(in srgb, var(--c) 45%, transparent);
+  background: rgba(77,163,255,.32);
+  box-shadow: 0 0 22px rgba(77,163,255,.35);
 }
 
 /* ===== contato ===== */
