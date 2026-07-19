@@ -1,12 +1,12 @@
 /* =========================================================
-   DADOS DO PORTFÓLIO — edite aqui, sem mexer no resto!
+   DADOS DO PORTFÓLIO: edite aqui, sem mexer no resto!
    ========================================================= */
 
 const PERFIL = {
   nome: "Maxwell Gomes",
   usuario: "maxyzao",
   titulo: "Desenvolvedor Full Stack",
-  local: "Fortaleza — CE, Brasil",
+  local: "Fortaleza, CE, Brasil",
   bio: "Criando websites modernos com visual limpo, responsivo e elegante. Transformo ideias e design em experiências digitais que funcionam.",
   cv: "assets/cv-maxwell.pdf",       // ← coloque seu CV em PDF nessa pasta
   frases: [                          // ← frases do efeito de digitação do hero
@@ -23,7 +23,7 @@ const PERFIL = {
 };
 
 /* ---------------------------------------------------------
-   SKILLS — cada uma vira uma keycap do teclado 3D.
+   SKILLS: cada uma vira uma keycap do teclado 3D.
    icon: nome do ícone no Devicon (https://devicon.dev)
          ou use  text: "API"  para tecla só com texto.
    key:  tecla física do teclado que aciona essa keycap.
@@ -47,7 +47,7 @@ const SKILLS = [
 ];
 
 /* ---------------------------------------------------------
-   PROJETOS — cards com filtro por categoria.
+   PROJETOS: cards com filtro por categoria.
    categoria: aparece como filtro (use a mesma string para agrupar)
    cor: cor de destaque do card
    link / repo: pode deixar "" se não tiver
@@ -73,7 +73,7 @@ const PROJETOS = [
   },
   {
     titulo: "Este Portfólio",
-    desc: "Site pessoal com teclado 3D interativo, crachá com física e animações de scroll — feito do zero, sem frameworks.",
+    desc: "Site pessoal com teclado 3D interativo, crachá com física e animações de scroll, feito do zero, sem frameworks.",
     categoria: "JavaScript",
     stack: ["HTML", "CSS", "JavaScript", "GSAP"],
     cor: "#6d54c4",
@@ -84,14 +84,14 @@ const PROJETOS = [
 ];
 
 /* ---------------------------------------------------------
-   CERTIFICADOS — logo: caminho de imagem OU icon do Devicon.
+   CERTIFICADOS: logo: caminho de imagem OU icon do Devicon.
    arquivo: caminho do PDF (gera o link "ver certificado").
    --------------------------------------------------------- */
 const CERTIFICADOS = [
   {
-    titulo: "DevQuest — Extensão Universitária",
+    titulo: "DevQuest Extensão Universitária",
     emissor: "FEX Educação • MEC",
-    ano: "2023–2026",
+    ano: "2023 a 2026",
     desc: "Capacitação de 123h registrada por faculdade credenciada junto ao MEC: HTML, CSS, JavaScript, React, TypeScript, Node, SQL, Git e projetos práticos.",
     logo: "assets/devquest.svg",
     cor: "#a855f7",

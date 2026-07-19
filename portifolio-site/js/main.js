@@ -1,5 +1,5 @@
 /* =========================================================
-   PORTFÓLIO — lógica e animações
+   PORTFÓLIO: lógica e animações
    (os dados editáveis ficam em js/data.js)
    ========================================================= */
 
@@ -114,7 +114,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* =========================================================
-   CRACHÁ — física elástica realista
+   CRACHÁ: física elástica realista
    O cartão é um corpo com massa pendurado numa fita-mola:
    dá pra puxar em QUALQUER direção, a fita estica e ele
    volta quicando, com balanço angular próprio.
@@ -191,7 +191,7 @@ requestAnimationFrame(fisica);
 gsap.to(".cracha-brilho", { xPercent: 240, duration: 1.4, ease: "power2.inOut", repeat: -1, repeatDelay: 4 });
 
 /* =========================================================
-   PROJETOS — cards + filtros por categoria
+   PROJETOS: cards + filtros por categoria
    ========================================================= */
 const grid = $("#projetos-grid");
 const filtros = $("#filtros");
@@ -250,14 +250,14 @@ gsap.timeline({ defaults: { ease: "power3.out" } })
   .from([".hero-type", ".hero-tags", ".hero-cta"], { opacity: 0, y: 24, stagger: 0.08, duration: 0.5 }, 0.45)
   .from(".lanyard", { y: -560, duration: 1.1, ease: "bounce.out", onComplete: () => { vy += 380; vx += 60; } }, 0.3);
 
-/* fundo desloca conforme rola a página — sensação de passear pelo cenário */
+/* fundo desloca conforme rola a página, sensação de passear pelo cenário */
 gsap.to(".bg", {
   xPercent: -6, yPercent: -9,
   ease: "none",
   scrollTrigger: { trigger: "body", start: "top top", end: "bottom bottom", scrub: 1.2 },
 });
-gsap.to(".bg-grid", {
-  backgroundPosition: "0px 640px",
+gsap.to(".bg-grid-mov", {
+  y: 640,
   ease: "none",
   scrollTrigger: { trigger: "body", start: "top top", end: "bottom bottom", scrub: 1.2 },
 });

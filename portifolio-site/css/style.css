@@ -20,6 +20,7 @@ body {
   background: var(--bg);
   color: var(--texto);
   font-family: "Space Grotesk", system-ui, sans-serif;
+  font-weight: 500;
   overflow-x: hidden;
 }
 .mono { font-family: "JetBrains Mono", monospace; }
@@ -27,14 +28,18 @@ a { color: inherit; text-decoration: none; }
 img { max-width: 100%; }
 
 /* ===== fundo que passeia ===== */
-.bg { position: fixed; inset: -20%; z-index: -1; pointer-events: none; }
+.bg { position: fixed; inset: -20%; z-index: -1; pointer-events: none; will-change: transform; transform: translateZ(0); }
 .bg-grid {
   position: absolute; inset: 0;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, #000 40%, transparent 100%);
+}
+.bg-grid-mov {
+  position: absolute; inset: -680px 0 0 0;
   background-image:
     linear-gradient(rgba(120,170,255,.06) 1px, transparent 1px),
     linear-gradient(90deg, rgba(120,170,255,.06) 1px, transparent 1px);
   background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, #000 40%, transparent 100%);
+  will-change: transform;
 }
 .bg-stars {
   position: absolute; inset: 0;
@@ -204,7 +209,7 @@ img { max-width: 100%; }
   letter-spacing: .02em;
   background: linear-gradient(#f4f8ff, #6fa5f0);
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  filter: drop-shadow(0 10px 30px rgba(0,0,0,.6)) drop-shadow(0 0 46px var(--glow));
+  text-shadow: 0 10px 30px rgba(0,0,0,.55), 0 0 46px var(--glow);
 }
 
 /* ===== skills / teclado ===== */
@@ -342,8 +347,8 @@ img { max-width: 100%; }
   padding: 5px 12px; border-radius: 6px;
 }
 .card-corpo { padding: 20px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
-.card-corpo h3 { font-size: 1.12rem; }
-.card-corpo p { color: var(--texto-2); font-size: .9rem; line-height: 1.6; flex: 1; }
+.card-corpo h3 { font-size: 1.15rem; font-weight: 700; color: #f2f7ff; text-shadow: 0 0 18px rgba(77,163,255,.4); }
+.card-corpo p { color: #a9bcdc; font-size: .9rem; line-height: 1.65; flex: 1; }
 .card-stack { display: flex; flex-wrap: wrap; gap: 6px; }
 .card-stack span {
   font-family: "JetBrains Mono", monospace; font-size: .66rem; color: var(--texto-2);
@@ -355,9 +360,10 @@ img { max-width: 100%; }
 .card-links .sem-link { color: var(--texto-3); }
 
 /* ===== certificados ===== */
-.certs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 22px; }
+.certs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+.cert:first-child { grid-column: 1 / -1; }
 .cert {
-  display: flex; gap: 18px; align-items: flex-start;
+  display: flex; gap: 18px; align-items: stretch;
   background: var(--panel); border: 1px solid var(--linha); border-radius: 16px;
   padding: 22px; transition: transform .25s, border-color .25s;
 }
@@ -368,16 +374,32 @@ img { max-width: 100%; }
   background: color-mix(in srgb, var(--c) 22%, #101014);
   border: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
 }
-.cert-logo img { width: 32px; height: 32px; }
-.cert-corpo h3 { font-size: 1rem; margin-bottom: 4px; }
-.cert-meta { font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; }
-.cert-corpo p { color: var(--texto-2); font-size: .86rem; line-height: 1.6; margin-top: 8px; }
-.cert-link {
-  display: inline-block; margin-top: 12px;
-  font-family: "JetBrains Mono", monospace; font-size: .74rem;
-  color: var(--accent);
+.cert-logo img { width: 34px; height: 34px; }
+.cert-corpo { display: flex; flex-direction: column; flex: 1; }
+.cert-corpo h3 {
+  font-size: 1.15rem; font-weight: 700; margin-bottom: 4px;
+  color: #f2f7ff; text-shadow: 0 0 18px rgba(77,163,255,.45);
 }
-.cert-link:hover { text-decoration: underline; }
+.cert-meta {
+  font-family: "JetBrains Mono", monospace; font-size: .7rem; font-weight: 700;
+  letter-spacing: .12em; color: var(--accent); text-transform: uppercase;
+  text-shadow: 0 0 14px var(--glow);
+}
+.cert-corpo p { color: #a9bcdc; font-size: .9rem; line-height: 1.65; margin: 8px 0 14px; }
+.cert-link {
+  align-self: flex-start; margin-top: auto;
+  font-family: "JetBrains Mono", monospace; font-size: .74rem; font-weight: 700;
+  padding: 8px 16px; border-radius: 8px;
+  color: #e7f1ff;
+  background: color-mix(in srgb, var(--c) 26%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--c) 80%, transparent);
+  transition: background .2s, box-shadow .2s;
+}
+.cert-link:hover {
+  background: color-mix(in srgb, var(--c) 40%, transparent);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--c) 45%, transparent);
+}
 
 /* ===== contato ===== */
 .contato { text-align: center; padding-bottom: 60px; }
