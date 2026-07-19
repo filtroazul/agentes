@@ -231,11 +231,12 @@ renderProjetos("Todos");
    ========================================================= */
 $("#certs-grid").innerHTML = CERTIFICADOS.map((c) => `
   <article class="cert" style="--c:${c.cor}">
-    <div class="cert-logo"><img src="${c.logo || iconUrl(c.icon)}" alt="${c.emissor}" /></div>
+    <div class="cert-logo"><img src="${c.logo || iconUrl(c.icon)}" alt="${c.emissor}" loading="lazy" decoding="async" /></div>
     <div class="cert-corpo">
       <h3>${c.titulo}</h3>
       <span class="cert-meta">${c.emissor} • ${c.ano}</span>
       <p>${c.desc}</p>
+      ${c.arquivo ? `<a class="cert-link" href="${c.arquivo}" target="_blank" rel="noopener">ver certificado ↗</a>` : ""}
     </div>
   </article>`).join("");
 

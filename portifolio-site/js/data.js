@@ -11,6 +11,7 @@ const PERFIL = {
   cv: "assets/cv-maxwell.pdf",       // ← coloque seu CV em PDF nessa pasta
   frases: [                          // ← frases do efeito de digitação do hero
     "Full Stack Developer",
+    "Backend e Frontend",
     "Criando softwares desde 2023",
     "Websites modernos e responsivos",
   ],
@@ -84,23 +85,52 @@ const PROJETOS = [
 
 /* ---------------------------------------------------------
    CERTIFICADOS — logo: caminho de imagem OU icon do Devicon.
+   arquivo: caminho do PDF (gera o link "ver certificado").
    --------------------------------------------------------- */
 const CERTIFICADOS = [
   {
-    titulo: "Formação Full Stack — Dev em Dobro",
-    emissor: "DevQuest",
-    ano: "2025",
-    desc: "Formação completa em desenvolvimento web: HTML, CSS, JavaScript, React, Node.js e banco de dados.",
-    icon: "react/react-original",
-    cor: "#6d54c4",
+    titulo: "DevQuest — Extensão Universitária",
+    emissor: "FEX Educação • MEC",
+    ano: "2023–2026",
+    desc: "Capacitação de 123h registrada por faculdade credenciada junto ao MEC: HTML, CSS, JavaScript, React, TypeScript, Node, SQL, Git e projetos práticos.",
+    logo: "assets/devquest.svg",
+    cor: "#a855f7",
+    arquivo: "assets/certificados/devquest-mec.pdf",
   },
   {
-    titulo: "Python para Automação",
-    emissor: "— edite em js/data.js —",
-    ano: "2025",
-    desc: "Automação de tarefas, integração com APIs e criação de bots.",
-    icon: "python/python-plain",
-    cor: "#366fa3",
+    titulo: "DevQuest Frontend",
+    emissor: "Dev em Dobro",
+    ano: "2026",
+    desc: "Curso de programação frontend com aulas teóricas e práticas, completando mais de 80 horas.",
+    icon: "react/react-original",
+    cor: "#2fb6d9",
+    arquivo: "assets/certificados/devquest-frontend.pdf",
   },
-  // 👉 adicione seus certificados aqui
+  {
+    titulo: "DevQuest Backend",
+    emissor: "Dev em Dobro",
+    ano: "2026",
+    desc: "Curso de programação backend com aulas teóricas e práticas, completando mais de 20 horas.",
+    icon: "nodejs/nodejs-plain",
+    cor: "#3c873a",
+    arquivo: "assets/certificados/devquest-backend.pdf",
+  },
+  {
+    titulo: "DevQuest Marketing Pessoal",
+    emissor: "Dev em Dobro",
+    ano: "2026",
+    desc: "Marketing pessoal para programadores: criação de currículo, LinkedIn, GitHub e portfólio.",
+    icon: "linkedin/linkedin-plain",
+    cor: "#0a66c2",
+    arquivo: "assets/certificados/devquest-marketing.pdf",
+  },
+  {
+    titulo: "Análise e Desenvolvimento de Sistemas",
+    emissor: "Estácio",
+    ano: "cursando",
+    desc: "Graduação tecnológica em andamento na Universidade Estácio de Sá.",
+    logo: "assets/estacio-simbolo.png",
+    cor: "#1478d2",
+  },
+  // 👉 adicione novos certificados aqui
 ];

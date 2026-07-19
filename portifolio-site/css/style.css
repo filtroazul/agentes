@@ -120,12 +120,6 @@ img { max-width: 100%; }
 .btn-solido:hover { box-shadow: 0 0 42px rgba(77,163,255,.65), 0 10px 26px rgba(0,0,0,.4); }
 .btn-borda { border: 1px solid var(--linha); background: rgba(13,19,34,.6); color: var(--texto-2); }
 .btn-borda:hover { color: var(--texto); border-color: var(--accent); box-shadow: 0 0 20px rgba(77,163,255,.25); }
-.scroll-hint {
-  position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
-  font-size: .72rem; letter-spacing: .3em; color: var(--texto-2);
-  animation: flutua 2.2s ease-in-out infinite;
-}
-@keyframes flutua { 50% { transform: translate(-50%, 6px); } }
 
 /* ===== crachá / lanyard ===== */
 .lanyard-area { position: relative; height: min(78vh, 640px); display: flex; justify-content: center; }
@@ -201,7 +195,6 @@ img { max-width: 100%; }
   background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.5) 46%, transparent 60%);
   transform: translateX(-120%);
 }
-.hint-arraste { position: absolute; bottom: -6px; font-size: .68rem; color: var(--texto-3); letter-spacing: .18em; }
 
 /* ===== títulos gigantes ===== */
 .titulo-gigante {
@@ -301,7 +294,7 @@ img { max-width: 100%; }
 
 /* ===== seções genéricas ===== */
 .secao { padding: 130px clamp(20px, 5vw, 64px); max-width: 1200px; margin: 0 auto; }
-.secao-sub { text-align: center; color: var(--texto-2); font-size: .8rem; letter-spacing: .16em; margin: 14px 0 44px; }
+.secao .titulo-gigante { margin-bottom: 48px; }
 
 /* ===== projetos ===== */
 .filtros { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 40px; }
@@ -379,6 +372,12 @@ img { max-width: 100%; }
 .cert-corpo h3 { font-size: 1rem; margin-bottom: 4px; }
 .cert-meta { font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; }
 .cert-corpo p { color: var(--texto-2); font-size: .86rem; line-height: 1.6; margin-top: 8px; }
+.cert-link {
+  display: inline-block; margin-top: 12px;
+  font-family: "JetBrains Mono", monospace; font-size: .74rem;
+  color: var(--accent);
+}
+.cert-link:hover { text-decoration: underline; }
 
 /* ===== contato ===== */
 .contato { text-align: center; padding-bottom: 60px; }
@@ -427,5 +426,5 @@ img { max-width: 100%; }
 /* respeita quem prefere menos animação */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .scroll-hint, .cracha-brilho { animation: none !important; }
+  .cracha-brilho, .type-cursor { animation: none !important; }
 }
