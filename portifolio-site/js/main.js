@@ -9,7 +9,6 @@ const $ = (s, el = document) => el.querySelector(s);
 const iconUrl = (icon) => `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${icon}.svg`;
 
 /* ===== preenche textos do perfil ===== */
-$("#hero-disponivel").append(PERFIL.disponivel);
 $("#hero-usuario").textContent = `// @${PERFIL.usuario} — ${PERFIL.titulo}_`;
 $("#hero-bio").textContent = PERFIL.bio;
 $("#hero-tags").innerHTML = SKILLS.slice(0, 6).map((s) => `<span>${s.nome}</span>`).join("");
@@ -39,7 +38,7 @@ SKILLS.forEach((skill, i) => {
   key.style.setProperty("--c", skill.cor);
   key.dataset.index = i;
   const conteudo = skill.icon
-    ? `<img src="${iconUrl(skill.icon)}" alt="${skill.nome}" />`
+    ? `<img src="${iconUrl(skill.icon)}" alt="${skill.nome}" loading="lazy" decoding="async" />`
     : `<span class="key-txt">${skill.text}</span>`;
   key.innerHTML = `
     <div class="key-cap">
@@ -111,23 +110,40 @@ lanyard.addEventListener("pointermove", (e) => { if (alvo) alvo = e; });
   lanyard.addEventListener(ev, () => { alvo = null; })
 );
 
+/* pausa a física quando o crachá sai da tela (economia de bateria) */
+let crachaVisivel = true;
+new IntersectionObserver(([e]) => (crachaVisivel = e.isIntersecting)).observe(lanyard);
+
+/* rolar a página dá um empurrãozinho no crachá */
+let ultimoScroll = window.scrollY;
+window.addEventListener("scroll", () => {
+  vel += (window.scrollY - ultimoScroll) * 0.08;
+  ultimoScroll = window.scrollY;
+}, { passive: true });
+
 function fisica(now) {
   const dt = Math.min((now - t0) / 1000, 0.05);
   t0 = now;
 
+  if (!crachaVisivel && !alvo) { requestAnimationFrame(fisica); return; }
+
   if (alvo) {
+    // segue o dedo com mola mole: atrasa, passa do ponto e rebola
     const p = pivot();
     const desejado = Math.atan2(alvo.clientX - p.x, Math.max(alvo.clientY - p.y, 40)) * (180 / Math.PI);
-    vel = (desejado - angulo) * 14;
-    angulo += vel * dt * 4;
+    vel += ((desejado - angulo) * 46 - vel * 5) * dt;
   } else {
-    const mola = -14 * angulo;         // volta pro centro
-    const atrito = -1.6 * vel;
-    vel += (mola + atrito) * dt * 4;
-    angulo += vel * dt;
-    angulo += Math.sin(now / 1400) * 0.006; // balanço sutil constante
+    // mola fraca + pouco atrito = balança bastante antes de parar
+    vel += (-9 * angulo - 0.9 * vel) * dt;
+    vel += Math.sin(now / 1300) * 1.4 * dt; // brisa constante
   }
-  angulo = Math.max(-60, Math.min(60, angulo));
+  angulo += vel * dt;
+
+  // bateu no limite? quica de volta
+  if (angulo > 70 || angulo < -70) {
+    angulo = Math.max(-70, Math.min(70, angulo));
+    vel *= -0.35;
+  }
   gsap.set(lanyard, { rotation: angulo });
   requestAnimationFrame(fisica);
 }
@@ -191,10 +207,9 @@ $("#certs-grid").innerHTML = CERTIFICADOS.map((c) => `
 
 /* intro do hero */
 gsap.timeline({ defaults: { ease: "power3.out" } })
-  .from(".hero-badge", { opacity: 0, y: 20, duration: 0.5 }, 0.1)
-  .from(".hero-titulo .linha", { opacity: 0, y: 60, stagger: 0.12, duration: 0.7 }, 0.2)
-  .from([".hero-sub", ".hero-bio", ".hero-tags", ".hero-cta"], { opacity: 0, y: 24, stagger: 0.08, duration: 0.5 }, 0.5)
-  .from(".lanyard", { y: -560, duration: 1.1, ease: "bounce.out", onComplete: () => (vel += 24) }, 0.35);
+  .from(".hero-titulo .linha", { opacity: 0, y: 60, stagger: 0.12, duration: 0.7 }, 0.15)
+  .from([".hero-sub", ".hero-bio", ".hero-tags", ".hero-cta"], { opacity: 0, y: 24, stagger: 0.08, duration: 0.5 }, 0.45)
+  .from(".lanyard", { y: -560, duration: 1.1, ease: "bounce.out", onComplete: () => (vel += 55) }, 0.3);
 
 /* fundo desloca conforme rola a página — sensação de passear pelo cenário */
 gsap.to(".bg", {
