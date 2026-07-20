@@ -22,11 +22,12 @@ $("#cracha-local").textContent = PERFIL.local;
 $("#link-email").href = `mailto:${PERFIL.email}`;
 $("#link-whats").href = `https://wa.me/${PERFIL.whatsapp}`;
 $("#sociais").innerHTML = [
-  ["GitHub", PERFIL.github],
-  ["LinkedIn", PERFIL.linkedin],
-  ["Instagram", PERFIL.instagram],
-  ["E-mail", `mailto:${PERFIL.email}`],
-].map(([nome, url]) => `<a href="${url}" target="_blank" rel="noopener">${nome} ↗</a>`).join("");
+  ["GitHub", PERFIL.github, "https://cdn.simpleicons.org/github/e8ecf8"],
+  ["LinkedIn", PERFIL.linkedin, iconUrl("linkedin/linkedin-original")],
+  ["Instagram", PERFIL.instagram, "https://cdn.simpleicons.org/instagram/e4405f"],
+  ["E-mail", `mailto:${PERFIL.email}`, "https://cdn.simpleicons.org/gmail/ea4335"],
+].map(([nome, url, icone]) =>
+  `<a href="${url}" target="_blank" rel="noopener"><img src="${icone}" alt="" loading="lazy" decoding="async" />${nome} ↗</a>`).join("");
 $("#ano").textContent = new Date().getFullYear();
 
 /* ===== efeito de digitação no hero (escreve, apaga, próxima frase) ===== */
@@ -202,7 +203,7 @@ function renderProjetos(cat) {
   grid.innerHTML = lista.map((p) => `
     <article class="card" style="--c:${p.cor}">
       <div class="card-capa">
-        ${p.capa ? `<img src="${p.capa}" alt="${p.titulo}" loading="lazy" decoding="async" />` : ""}
+        ${p.capa ? `<img src="${p.capa}" alt="${p.titulo}"${p.capaContain ? ' class="contain"' : ""} loading="lazy" decoding="async" />` : ""}
         <span class="card-cat">${p.categoria}</span>
       </div>
       <div class="card-corpo">
@@ -259,7 +260,7 @@ gsap.to(".bg", {
   ease: "none",
   scrollTrigger: { trigger: "body", start: "top top", end: "bottom bottom", scrub: 1.2 },
 });
-gsap.to(".bg-grid-mov", {
+gsap.to(".bg-tinta-mov", {
   y: 640,
   ease: "none",
   scrollTrigger: { trigger: "body", start: "top top", end: "bottom bottom", scrub: 1.2 },
@@ -269,7 +270,7 @@ gsap.to(".bg-grid-mov", {
 const keys = gsap.utils.toArray(".key");
 gsap.set(".keyboard", { rotateX: 48, rotateZ: -38 });
 
-gsap.timeline({
+const skillsTl = gsap.timeline({
   scrollTrigger: {
     trigger: ".skills",
     start: "top top",
@@ -282,6 +283,14 @@ gsap.timeline({
   .fromTo(".keyboard", { rotateX: 72, rotateZ: -8, y: 260 }, { rotateX: 48, rotateZ: -38, y: 0, duration: 0.6 }, 0.1)
   .fromTo(keys, { z: 420, opacity: 0 }, { z: 0, opacity: 1, stagger: { each: 0.02, from: "random" }, duration: 0.45 }, 0.25)
   .fromTo(".skills-hint", { opacity: 0 }, { opacity: 1, duration: 0.15 }, 0.8);
+
+/* clicar em "Skills" no menu leva ao fim do pin, com o teclado já montado */
+document.querySelectorAll('a[href="#skills"]').forEach((a) => {
+  a.addEventListener("click", (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: skillsTl.scrollTrigger.end, behavior: "smooth" });
+  });
+});
 
 /* títulos gigantes das outras seções passeiam mais rápido que o resto */
 gsap.utils.toArray(".secao .titulo-gigante[data-parallax]").forEach((el) => {

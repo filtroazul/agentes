@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sabtec | Gráfica Rápida e Acessórios</title>
+  <meta name="description" content="Sabtec Gráfica Rápida: adesivos, rótulos, banners, cartões, canecas e personalizados em Fortaleza. E também acessórios para celular e eletrônicos." />
+  <meta name="theme-color" content="#0d0d10" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M30 155 V70 Q30 25 75 25 H125 Q170 25 170 70 V110 Q170 155 125 155 Z' fill='%2398cb32'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=1" />
+</head>
+<body>
+
+  <!-- ===== INTRO: a logo se desenhando ===== -->
+  <div class="intro" id="intro" aria-hidden="true">
+    <svg class="intro-logo" viewBox="0 0 240 260">
+      <!-- balão da logo (canto inferior esquerdo pontudo) -->
+      <path id="i-balao" d="M50 175 V90 Q50 45 95 45 H145 Q190 45 190 90 V130 Q190 175 145 175 Z"
+            fill="#98cb32" stroke="#98cb32" stroke-width="4" />
+      <!-- letra S em traço único -->
+      <path id="i-esse" d="M155 82 Q155 65 121 65 Q89 65 89 87 Q89 106 120 109 Q152 112 152 130 Q152 152 120 152 Q86 152 86 136"
+            fill="none" stroke="#ffffff" stroke-width="15" stroke-linecap="round" />
+      <!-- marca de corte -->
+      <path id="i-corte" d="M42 150 V190 H84" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="square" />
+      <!-- Gráfica + quadradinhos CMYK -->
+      <text id="i-texto" x="96" y="216" font-family="Archivo, sans-serif" font-weight="700"
+            font-size="27" letter-spacing="2" fill="#ffffff">Gráfica</text>
+      <g id="i-cmyk">
+        <rect x="128" y="228" width="11" height="11" fill="#e5399b" />
+        <rect x="144" y="228" width="11" height="11" fill="#29b8e5" />
+        <rect x="160" y="228" width="11" height="11" fill="#ffffff" />
+        <rect x="176" y="228" width="11" height="11" fill="#f5d90a" />
+      </g>
+    </svg>
+  </div>
+
+  <!-- ===== NAV ===== -->
+  <header class="nav" id="nav">
+    <a class="nav-logo" href="#inicio" aria-label="Sabtec">
+      <svg viewBox="0 0 200 200" class="nav-logo-icone"><path d="M30 155 V70 Q30 25 75 25 H125 Q170 25 170 70 V110 Q170 155 125 155 Z" fill="#98cb32"/><path d="M138 70 Q138 56 106 56 Q78 56 78 75 Q78 91 105 94 Q135 97 135 113 Q135 132 105 132 Q75 132 75 118" fill="none" stroke="#0d0d10" stroke-width="13" stroke-linecap="round"/></svg>
+      <span>SABTEC<em>gráfica</em></span>
+    </a>
+    <nav class="nav-links">
+      <a href="#servicos">Serviços</a>
+      <a href="#produtos">Produtos</a>
+      <a href="#acessorios">Acessórios</a>
+      <a href="#sobre">A Loja</a>
+    </nav>
+    <a class="btn btn-verde nav-cta" href="https://wa.me/5585987441252" target="_blank" rel="noopener">Pedir orçamento</a>
+  </header>
+
+  <main>
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="inicio">
+      <div class="hero-texto">
+        <span class="selo">✦ gráfica rápida em Fortaleza ✦</span>
+        <h1 class="hero-titulo">
+          <span class="palavra">Sua</span>
+          <span class="palavra">ideia</span>
+          <span class="palavra destaque">impressa
+            <svg class="risco" viewBox="0 0 300 24" preserveAspectRatio="none"><path d="M4 16 Q80 6 150 13 Q225 20 296 9" fill="none" stroke="#98cb32" stroke-width="7" stroke-linecap="round"/></svg>
+          </span>
+          <span class="palavra">do</span>
+          <span class="palavra">seu</span>
+          <span class="palavra">jeito</span>
+        </h1>
+        <p class="hero-sub">Adesivos, rótulos, banners, cartões, canecas e tudo que a sua marca precisar. Você manda a ideia, a gente imprime hoje.</p>
+        <div class="hero-cta">
+          <a class="btn btn-verde" href="https://wa.me/5585987441252" target="_blank" rel="noopener">Pedir no WhatsApp</a>
+          <a class="btn btn-borda" href="#servicos">Ver serviços ↓</a>
+        </div>
+        <ul class="provas">
+          <li><strong>24h</strong><span>produção expressa</span></li>
+          <li><strong>+300</strong><span>artes entregues</span></li>
+          <li><strong>Loja física</strong><span>e atendimento online</span></li>
+        </ul>
+      </div>
+
+      <div class="hero-visual">
+        <figure class="impresso imp-1">
+          <img src="assets/g6.jpg" alt="Canecas personalizadas" />
+          <figcaption>canecas personalizadas</figcaption>
+          <i class="corte c-tl"></i><i class="corte c-tr"></i><i class="corte c-bl"></i><i class="corte c-br"></i>
+        </figure>
+        <figure class="impresso imp-2">
+          <img src="assets/g8.jpg" alt="Plotter recortando adesivos" />
+          <figcaption>adesivos já recortados</figcaption>
+          <i class="corte c-tl"></i><i class="corte c-tr"></i><i class="corte c-bl"></i><i class="corte c-br"></i>
+        </figure>
+        <span class="ponto p-c"></span><span class="ponto p-m"></span><span class="ponto p-y"></span>
+      </div>
+    </section>
+
+    <!-- ===== MARQUEE ===== -->
+    <div class="faixa" aria-hidden="true">
+      <div class="faixa-mov">
+        <span>ADESIVOS ✦ RÓTULOS ✦ ETIQUETAS ✦ BANNERS ✦ CARTÕES ✦ CANECAS ✦ CAMISETAS ✦ AGENDAS ✦ XEROX ✦ FOTO 3x4 ✦ CURRÍCULO ✦&nbsp;</span>
+        <span>ADESIVOS ✦ RÓTULOS ✦ ETIQUETAS ✦ BANNERS ✦ CARTÕES ✦ CANECAS ✦ CAMISETAS ✦ AGENDAS ✦ XEROX ✦ FOTO 3x4 ✦ CURRÍCULO ✦&nbsp;</span>
+      </div>
+    </div>
+
+    <!-- ===== SERVIÇOS: ícones que se desenham ===== -->
+    <section class="secao" id="servicos">
+      <h2 class="titulo"><span class="titulo-mini">o que a gente imprime</span>Serviços da gráfica</h2>
+      <div class="serv-grid">
+        <article class="serv">
+          <svg class="serv-icone" viewBox="0 0 80 80"><circle cx="40" cy="40" r="26" /><path d="M40 66 Q58 60 62 44" /><path d="M30 34 q10 -10 20 0 M28 46 q12 12 24 0" /></svg>
+          <h3>Adesivos e rótulos</h3>
+          <p>Personalizados, à prova d'água e já recortados, prontos pra aplicar.</p>
+        </article>
+        <article class="serv">
+          <svg class="serv-icone" viewBox="0 0 80 80"><path d="M14 18 H66 V50 H14 Z" /><path d="M24 50 V66 M56 50 V66 M14 58 H66" /><path d="M24 28 H48 M24 38 H40" /></svg>
+          <h3>Banners e placas</h3>
+          <p>Do tamanho que precisar, com lona resistente e cores vivas.</p>
+        </article>
+        <article class="serv">
+          <svg class="serv-icone" viewBox="0 0 80 80"><rect x="12" y="22" width="56" height="36" rx="5" /><path d="M12 34 H68 M20 48 H40" /></svg>
+          <h3>Cartões e papelaria</h3>
+          <p>Cartões de visita, tags, etiquetas e agendas pra sua empresa.</p>
+        </article>
+        <article class="serv">
+          <svg class="serv-icone" viewBox="0 0 80 80"><path d="M22 20 H58 V60 Q58 66 52 66 H28 Q22 66 22 60 Z" /><path d="M58 30 Q72 30 72 42 Q72 54 58 54" /><path d="M30 32 q10 6 20 0" /></svg>
+          <h3>Canecas e brindes</h3>
+          <p>Presentes personalizados que ninguém esquece, do seu jeitinho.</p>
+        </article>
+        <article class="serv">
+          <svg class="serv-icone" viewBox="0 0 80 80"><path d="M28 18 L40 24 L52 18 L66 28 L58 38 L58 64 H22 V38 L14 28 Z" /><path d="M34 44 q6 8 12 0" /></svg>
+          <h3>Camisetas</h3>
+          <p>Estampas personalizadas pra uniformes, eventos e datas especiais.</p>
+        </article>
+        <article class="serv">
+          <svg class="serv-icone" viewBox="0 0 80 80"><path d="M22 30 V14 H58 V30" /><rect x="14" y="30" width="52" height="22" rx="4" /><path d="M22 52 H58 V68 H22 Z" /><path d="M28 59 H50" /></svg>
+          <h3>Xerox e impressão</h3>
+          <p>Impressão rápida, segunda via de boletos, currículos e foto 3x4.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===== divisória tesoura ===== -->
+    <div class="tesoura-linha" aria-hidden="true">
+      <svg viewBox="0 0 1200 40" preserveAspectRatio="none" class="linha-corte"><path d="M0 20 H1200" stroke-dasharray="10 9" /></svg>
+      <span class="tesoura">✂</span>
+    </div>
+
+    <!-- ===== PRODUÇÃO ===== -->
+    <section class="producao">
+      <div class="prod-fotos">
+        <figure class="impresso imp-3">
+          <img src="assets/g10.jpg" alt="Impressão de adesivos em rolo" />
+          <i class="corte c-tl"></i><i class="corte c-tr"></i><i class="corte c-bl"></i><i class="corte c-br"></i>
+        </figure>
+      </div>
+      <div class="prod-texto">
+        <h2 class="titulo titulo-claro"><span class="titulo-mini">produção própria</span>Máquina rodando todo dia</h2>
+        <p>Aqui a impressão é feita na hora, dentro da loja. Você acompanha o pedido de perto e não fica esperando fornecedor de fora: chegou, imprimiu, levou.</p>
+        <ul class="prod-lista">
+          <li>✦ Plotter de recorte pra adesivo sair prontinho</li>
+          <li>✦ Impressão colorida de alta qualidade</li>
+          <li>✦ Prazo combinado é prazo cumprido</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== PRODUTOS ===== -->
+    <section class="secao" id="produtos">
+      <h2 class="titulo"><span class="titulo-mini">saindo do forno</span>Personalizados de verdade</h2>
+      <div class="vitrine">
+        <a class="card-prod" href="https://wa.me/5585987441252" target="_blank" rel="noopener">
+          <div class="card-foto"><img src="assets/g6.jpg" alt="Canecas personalizadas" /><span class="tag">queridinha</span></div>
+          <h3>Canecas personalizadas</h3>
+          <p>Com foto, nome ou a arte que você quiser.</p>
+        </a>
+        <a class="card-prod" href="https://wa.me/5585987441252" target="_blank" rel="noopener">
+          <div class="card-foto"><img src="assets/g4.jpg" alt="Fotos estilo polaroid" /><span class="tag tag-rosa">presente</span></div>
+          <h3>Fotos polaroid</h3>
+          <p>Momentos impressos pra guardar e presentear.</p>
+        </a>
+        <a class="card-prod" href="https://wa.me/5585987441252" target="_blank" rel="noopener">
+          <div class="card-foto"><img src="assets/g3.jpg" alt="Figurinhas personalizadas" /></div>
+          <h3>Figurinhas e cards</h3>
+          <p>Álbuns e coleções impressos com recorte perfeito.</p>
+        </a>
+        <a class="card-prod" href="https://wa.me/5585987441252" target="_blank" rel="noopener">
+          <div class="card-foto"><img src="assets/g7.jpg" alt="Kits presente personalizados" /><span class="tag">kit completo</span></div>
+          <h3>Kits presente</h3>
+          <p>Caneca + mimos personalizados prontos pra dar.</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- ===== ACESSÓRIOS ===== -->
+    <section class="acessorios" id="acessorios">
+      <h2 class="titulo titulo-claro"><span class="titulo-mini">@sabtecacessorios</span>Também somos loja de acessórios</h2>
+      <p class="acess-sub">Além da gráfica, a Sabtec tem tudo pro seu celular e seus eletrônicos, na mesma loja.</p>
+      <div class="acess-grid">
+        <div class="acess">
+          <svg class="serv-icone" viewBox="0 0 80 80"><path d="M20 40 Q20 16 40 16 Q60 16 60 40" /><rect x="12" y="40" width="14" height="22" rx="6" /><rect x="54" y="40" width="14" height="22" rx="6" /></svg>
+          <span>Fones de ouvido</span>
+        </div>
+        <div class="acess">
+          <svg class="serv-icone" viewBox="0 0 80 80"><rect x="24" y="12" width="32" height="56" rx="8" /><path d="M36 20 H44" /><circle cx="40" cy="58" r="3" /></svg>
+          <span>Capas de celular</span>
+        </div>
+        <div class="acess">
+          <svg class="serv-icone" viewBox="0 0 80 80"><rect x="26" y="26" width="28" height="34" rx="6" /><path d="M34 26 V16 M46 26 V16" /><path d="M40 60 V70" /></svg>
+          <span>Carregadores</span>
+        </div>
+        <div class="acess">
+          <svg class="serv-icone" viewBox="0 0 80 80"><rect x="24" y="12" width="32" height="56" rx="8" /><path d="M30 20 L50 60" /></svg>
+          <span>Películas</span>
+        </div>
+        <div class="acess">
+          <svg class="serv-icone" viewBox="0 0 80 80"><rect x="20" y="20" width="40" height="44" rx="8" /><circle cx="40" cy="48" r="9" /><circle cx="40" cy="30" r="4" /></svg>
+          <span>Caixas de som</span>
+        </div>
+        <div class="acess">
+          <svg class="serv-icone" viewBox="0 0 80 80"><path d="M24 14 V32 Q24 40 32 40 H48 Q56 40 56 48 V66" /><path d="M18 14 H30 M50 66 H62" /></svg>
+          <span>Cabos e conectores</span>
+        </div>
+      </div>
+      <a class="btn btn-borda-claro" href="https://www.instagram.com/sabtecacessorios/" target="_blank" rel="noopener">Ver acessórios no Instagram ↗</a>
+    </section>
+
+    <!-- ===== SOBRE / LOJA ===== -->
+    <section class="secao sobre" id="sobre">
+      <figure class="impresso imp-loja">
+        <img src="assets/g2.jpg" alt="Fachada da loja Sabtec" />
+        <figcaption>nossa loja</figcaption>
+        <i class="corte c-tl"></i><i class="corte c-tr"></i><i class="corte c-bl"></i><i class="corte c-br"></i>
+      </figure>
+      <div class="sobre-texto">
+        <h2 class="titulo"><span class="titulo-mini">vem conhecer</span>Uma loja, mil soluções</h2>
+        <p>A <strong>Sabtec</strong> é aquela gráfica de bairro que resolve: do adesivo pro seu produto à segunda via do boleto, da caneca de presente ao carregador novo. Chega com o problema, sai com a solução impressa.</p>
+        <ul class="sobre-lista">
+          <li>📍 Loja física em Fortaleza, CE</li>
+          <li>⚡ Atendimento rápido no balcão e no WhatsApp</li>
+          <li>🎨 Criação de arte e identidade visual do zero</li>
+          <li>🖨 Produção própria, sem atravessador</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== CTA FINAL ===== -->
+    <section class="secao convite">
+      <div class="convite-caixa">
+        <h2>Bora imprimir sua ideia?</h2>
+        <p>Manda um "oi" no WhatsApp e receba seu orçamento em minutos.</p>
+        <div class="convite-botoes">
+          <a class="btn btn-preto" href="https://wa.me/5585987441252" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+          <a class="btn btn-borda-preto" href="https://www.instagram.com/sabtec/" target="_blank" rel="noopener">@sabtec ↗</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <span>SABTEC • gráfica rápida e acessórios</span>
+    <a href="https://www.instagram.com/sabtec/" target="_blank" rel="noopener">Instagram</a>
+    <span class="rodape-credito">site por <a href="../index.html">maxyzao.dev</a></span>
+  </footer>
+
+  <!-- ===== bot de atendimento: captura leads pelo chat ===== -->
+  <div id="sb-chat" data-url="https://agentes-s68ksrzb97z5q4qqp7f8nq.streamlit.app/?agente=atendimento&embed=true"></div>
+  <script>
+  (function () {
+    var chatUrl = document.getElementById("sb-chat").getAttribute("data-url");
+
+    var css = document.createElement("style");
+    css.textContent =
+      "#sb-chat-btn{position:fixed;right:20px;bottom:20px;width:62px;height:62px;border-radius:50%;border:0;cursor:pointer;" +
+      "background:#98cb32;box-shadow:0 8px 24px rgba(152,203,50,.45);z-index:99999;" +
+      "font-size:28px;line-height:1;display:flex;align-items:center;justify-content:center;transition:transform .18s}" +
+      "#sb-chat-btn:hover{transform:scale(1.08) rotate(-6deg)}" +
+      "#sb-chat-btn::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:3px solid rgba(152,203,50,.5);animation:sb-pulso 2s ease-out infinite}" +
+      "@keyframes sb-pulso{0%{transform:scale(.85);opacity:1}100%{transform:scale(1.35);opacity:0}}" +
+      "#sb-chat-balao{position:fixed;right:94px;bottom:32px;background:#f7f7f2;color:#0d0d10;font-family:'Archivo',sans-serif;" +
+      "font-weight:800;font-size:.88rem;padding:10px 16px;border-radius:6px 6px 2px 6px;box-shadow:0 8px 22px rgba(0,0,0,.4);" +
+      "z-index:99999;opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s;pointer-events:none;white-space:nowrap}" +
+      "#sb-chat-balao.mostra{opacity:1;transform:translateY(0)}" +
+      "#sb-chat-box{position:fixed;right:20px;bottom:94px;width:380px;height:560px;border:3px solid #98cb32;border-radius:10px;" +
+      "overflow:hidden;display:none;box-shadow:0 16px 48px rgba(0,0,0,.5);background:#16161b;z-index:99999}" +
+      "#sb-chat-box.aberto{display:block}" +
+      "#sb-chat-box iframe{width:100%;height:100%;border:0}" +
+      "@media (max-width:480px){#sb-chat-box{right:8px;left:8px;width:auto;height:72vh}#sb-chat-balao{font-size:.8rem}}";
+    document.head.appendChild(css);
+
+    var balao = document.createElement("div");
+    balao.id = "sb-chat-balao";
+    balao.textContent = "Orçamento na hora? Fala comigo!";
+
+    var btn = document.createElement("button");
+    btn.id = "sb-chat-btn";
+    btn.setAttribute("aria-label", "Falar com o atendimento");
+    btn.textContent = "💬";
+
+    var box = document.createElement("div");
+    box.id = "sb-chat-box";
+    var carregado = false;
+
+    btn.addEventListener("click", function () {
+      if (!carregado) {
+        var frame = document.createElement("iframe");
+        frame.src = chatUrl;
+        frame.title = "Atendimento Sabtec";
+        box.appendChild(frame);
+        carregado = true;
+      }
+      box.classList.toggle("aberto");
+      balao.classList.remove("mostra");
+      btn.textContent = box.classList.contains("aberto") ? "✕" : "💬";
+    });
+
+    document.body.appendChild(box);
+    document.body.appendChild(balao);
+    document.body.appendChild(btn);
+    setTimeout(function () { if (!box.classList.contains("aberto")) balao.classList.add("mostra"); }, 4200);
+    setTimeout(function () { balao.classList.remove("mostra"); }, 13000);
+  })();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="js/main.js?v=1"></script>
+</body>
+</html>

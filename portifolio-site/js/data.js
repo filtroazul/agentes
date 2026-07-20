@@ -15,11 +15,11 @@ const PERFIL = {
     "Criando softwares desde 2023",
     "Websites modernos e responsivos",
   ],
-  email: "maxgomeix@gmail.com",          // ← confira/edite seu e-mail
-  whatsapp: "5585992932642",             // ← só números, com DDI+DDD
+  email: "maxgomeix@gmail.com",
+  whatsapp: "5585991225077",             // só números, com DDI+DDD
   github: "https://github.com/Gyshro",
-  linkedin: "https://www.linkedin.com/in/maxwell-gomes", // ← cole a URL certa
-  instagram: "https://instagram.com/maxyzao",
+  linkedin: "https://www.linkedin.com/in/maxwell-gomes-45a780269/",
+  instagram: "https://www.instagram.com/maxyzao/",
 };
 
 /* ---------------------------------------------------------
@@ -55,9 +55,9 @@ const SKILLS = [
 const PROJETOS = [
   {
     titulo: "Monitoramento AIOTI Soluções",
-    desc: "Vídeo conceito da plataforma de monitoramento da AIOTI Soluções Industriais, empresa onde atuo: um dashboard para os clientes acompanharem seus equipamentos.",
-    categoria: "UI/UX",
-    stack: ["Dashboard", "Vídeo conceito", "Product Design"],
+    desc: "Plataforma de monitoramento da AIOTI Soluções Industriais, empresa onde atuo: dashboard para os clientes acompanharem seus equipamentos, feita com Python na AWS e login com segurança JWT.",
+    categoria: "AWS + PostgreSQL",
+    stack: ["Python", "AWS", "PostgreSQL", "JWT"],
     cor: "#35c24a",
     capa: "assets/projetos/aioti.jpg",
     link: "https://www.instagram.com/p/DZiFYkshQmZ/",
@@ -69,7 +69,41 @@ const PROJETOS = [
     categoria: "Python",
     stack: ["Python", "Streamlit", "IA"],
     cor: "#366fa3",
+    capa: "assets/projetos/agente-ia.svg",
+    capaContain: true,
+    link: "https://agentes-s68ksrzb97z5q4qqp7f8nq.streamlit.app/?agente=atendimento",
+    repo: "",
+  },
+  {
+    titulo: "Site Portfólio Elegante",
+    desc: "Site de portfólio com tema escuro elegante, navegação flutuante, efeito de digitação e cartão de destaque com foto.",
+    categoria: "UI/UX",
+    stack: ["HTML", "CSS", "JavaScript"],
+    cor: "#c98a5e",
+    capa: "assets/foto3.png",
     link: "",
+    repo: "",
+  },
+  {
+    titulo: "Loja Colmeia Encantada",
+    desc: "Loja online feita para a cliente Colmeia Encantada, moda infantil: vitrine com fotos reais, filtros por categoria, animações com GSAP e código de efetuação de pagamento em JavaScript e Node.js para finalizar as compras.",
+    categoria: "Front-end",
+    stack: ["JavaScript", "Node.js", "GSAP", "Pagamentos"],
+    cor: "#f2a51d",
+    capa: "assets/projetos/colmeia-abelha.svg",
+    capaContain: true,
+    link: "colmeia-encantada/index.html",
+    repo: "",
+  },
+  {
+    titulo: "Site AIOTI Soluções",
+    desc: "Site oficial da AIOTI Soluções Industriais: apresenta a empresa, os serviços de engenharia, automação e IoT, os produtos e os projetos realizados.",
+    categoria: "JavaScript",
+    stack: ["HTML", "CSS", "JavaScript"],
+    cor: "#79d649",
+    capa: "assets/projetos/logo-aioti.png",
+    capaContain: true,
+    link: "https://aiotisolucoes.com.br/",
     repo: "",
   },
   {
