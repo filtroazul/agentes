@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Currículo - Maxwell Gomes Mendes</title>
+<style>
+  @page { size: A4; margin: 12mm 16mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Calibri, Arial, sans-serif;
+    font-size: 10.2pt;
+    color: #26303b;
+    line-height: 1.4;
+    background: #fff;
+  }
+  .item, .idiomas, .adjacente { page-break-inside: avoid; }
+
+  /* ===== CABEÇALHO ===== */
+  .topo { display: flex; align-items: center; gap: 8mm; border-bottom: 2.5px solid #1f4e79; padding-bottom: 6mm; }
+  .topo-foto img {
+    width: 30mm; height: 40mm; object-fit: cover;
+    border-radius: 2.5mm; border: 1px solid #d7dee6;
+  }
+  .topo-info { flex: 1; }
+  h1 { font-size: 21pt; color: #16232f; letter-spacing: .2px; line-height: 1.15; }
+  .cargo { font-size: 12.5pt; color: #1f4e79; font-weight: 600; margin: 1mm 0 3mm; }
+  .contato { font-size: 9.3pt; color: #46525e; }
+  .contato div { margin-top: .6mm; }
+  .contato b { color: #26303b; }
+  .links { margin-top: 2mm; font-size: 9.3pt; }
+  .links div { margin-top: .6mm; }
+  .links a { color: #1f4e79; text-decoration: none; }
+  .links b { color: #26303b; display: inline-block; min-width: 18mm; }
+
+  /* ===== SEÇÕES ===== */
+  h2 {
+    font-size: 11.5pt; color: #1f4e79; text-transform: uppercase; letter-spacing: 1px;
+    border-bottom: 1px solid #c9d4de; padding-bottom: 1mm; margin: 4.5mm 0 2.5mm;
+  }
+  .item { margin-bottom: 2.8mm; }
+  .item-titulo { display: flex; justify-content: space-between; align-items: baseline; }
+  .item-titulo strong { font-size: 10.8pt; color: #16232f; }
+  .periodo { font-size: 9pt; color: #5a6672; white-space: nowrap; margin-left: 4mm; }
+  .subtitulo { font-size: 9.6pt; color: #1f4e79; font-weight: 600; margin-bottom: 1mm; }
+  ul { margin: 1mm 0 0 5mm; }
+  li { margin-bottom: 1.2mm; }
+  a { color: #1f4e79; }
+  .resumo { text-align: justify; }
+
+  /* habilidades em colunas */
+  .skills { display: flex; flex-wrap: wrap; gap: 1.6mm; margin-top: 1mm; }
+  .skills span {
+    background: #eef3f8; border: 1px solid #d3dfea; color: #1f3f5e;
+    border-radius: 2mm; padding: .8mm 2.6mm; font-size: 9.2pt; font-weight: 600;
+  }
+
+  .quebra { page-break-before: always; }
+
+  .idiomas { display: flex; gap: 14mm; }
+  .idiomas b { color: #16232f; }
+
+  .adjacente { margin-top: 4mm; }
+  .adjacente h2 { color: #5a6672; border-color: #dde3e9; }
+  .adjacente .nota { font-size: 9pt; color: #5a6672; font-style: italic; margin-bottom: 1.5mm; }
+</style>
+</head>
+<body>
+
+  <!-- ===== CABEÇALHO ===== -->
+  <div class="topo">
+    <div class="topo-info">
+      <h1>Maxwell Gomes Mendes</h1>
+      <div class="cargo">Desenvolvedor Full Stack</div>
+      <div class="contato">
+        <div><b>Endereço:</b> Rua Vitória Régia, 979 A &ndash; Fortaleza, CE</div>
+        <div><b>Telefone:</b> (85) 99293-2642 &nbsp;|&nbsp; <b>E-mail:</b> maxgommax@gmail.com</div>
+        <div><b>Data de nascimento:</b> 17/05/2002 (24 anos)</div>
+      </div>
+      <div class="links">
+        <div><b>Portfólio:</b> <a href="https://portifolio-rho-eight-70.vercel.app/">portifolio-rho-eight-70.vercel.app</a></div>
+        <div><b>LinkedIn:</b> <a href="https://www.linkedin.com/in/maxwell-gomes-45a780269/">linkedin.com/in/maxwell-gomes-45a780269</a></div>
+        <div><b>GitHub:</b> <a href="https://github.com/Gyshro">github.com/Gyshro</a></div>
+      </div>
+    </div>
+    <div class="topo-foto"><img src="eu-cv.jpg" alt="Foto de Maxwell Gomes Mendes"></div>
+  </div>
+
+  <!-- ===== RESUMO ===== -->
+  <h2>Resumo Profissional</h2>
+  <p class="resumo">
+    Desenvolvedor Full Stack com experiência na criação de sites, lojas virtuais, dashboards e
+    automações com Inteligência Artificial para clientes reais. Atuo do front-end ao back-end,
+    entregando soluções completas, responsivas e publicadas em produção. Perfil autodidata,
+    comprometido com prazos e com facilidade para aprender novas tecnologias.
+  </p>
+
+  <!-- ===== HABILIDADES ===== -->
+  <h2>Habilidades</h2>
+  <div class="skills">
+    <span>JavaScript</span><span>TypeScript</span><span>React</span><span>Node.js</span>
+    <span>Python</span><span>HTML</span><span>CSS</span><span>Tailwind CSS</span>
+    <span>SQL</span><span>PostgreSQL</span><span>MongoDB</span><span>AWS</span>
+    <span>APIs REST</span><span>Git / GitHub</span><span>Streamlit</span><span>Integrações com IA</span>
+  </div>
+
+  <!-- ===== EXPERIÊNCIA ===== -->
+  <h2>Experiência Profissional</h2>
+
+  <div class="item">
+    <div class="item-titulo"><strong>AIOTI Soluções Industriais</strong><span class="periodo">2025 &ndash; Atual</span></div>
+    <div class="subtitulo">Desenvolvedor Full Stack</div>
+    <ul>
+      <li>Desenvolvimento da plataforma de monitoramento industrial da empresa: dashboard para os clientes acompanharem seus equipamentos, construída com Python e AWS, banco PostgreSQL e autenticação segura com JWT.</li>
+      <li>Desenvolvimento e manutenção do site oficial da empresa (<a href="https://aiotisolucoes.com.br/">aiotisolucoes.com.br</a>), apresentando serviços de engenharia, automação e IoT.</li>
+    </ul>
+  </div>
+
+  <div class="item">
+    <div class="item-titulo"><strong>Desenvolvedor Freelancer</strong><span class="periodo">05/2024 &ndash; Atual</span></div>
+    <div class="subtitulo">Desenvolvimento de sites, lojas virtuais e automações para clientes</div>
+    <ul>
+      <li>Loja virtual <b>Colmeia Encantada</b> (moda infantil): vitrine com fotos reais, filtros por categoria, animações e fluxo de pagamento em JavaScript e Node.js &mdash; <a href="https://gyshro.github.io/Colmeia/">gyshro.github.io/Colmeia</a>.</li>
+      <li>Site institucional da gráfica <b>Sabtec</b>, com chatbot de atendimento integrado e versão mobile &mdash; <a href="https://gyshro.github.io/Sabtec/">gyshro.github.io/Sabtec</a>.</li>
+      <li><b>Agente de atendimento com IA</b>: chatbot que qualifica leads automaticamente e envia os resultados por Telegram e Google Planilhas (Python + Streamlit).</li>
+      <li>Site para equipe participante do <b>festival de robótica do SESI</b> (projeto Subsilence), liderando uma equipe de quatro pessoas.</li>
+      <li>Estilização e organização de elementos de site de vendas para cliente; criação de landing pages para demandas diversas.</li>
+    </ul>
+  </div>
+
+  <!-- ===== FORMAÇÃO (página 2) ===== -->
+  <h2 class="quebra">Formação Acadêmica</h2>
+  <div class="item">
+    <div class="item-titulo"><strong>Análise e Desenvolvimento de Sistemas &mdash; Estácio</strong><span class="periodo">Cursando</span></div>
+    <div>Graduação tecnológica em andamento.</div>
+  </div>
+  <div class="item">
+    <div class="item-titulo"><strong>Ensino Médio Completo &mdash; Colégio Farias Brito</strong></div>
+  </div>
+
+  <!-- ===== CERTIFICAÇÕES ===== -->
+  <h2>Certificações</h2>
+  <div class="item">
+    <div class="item-titulo"><strong>Extensão Universitária DevQuest &mdash; FEX Educação (credenciada ao MEC)</strong><span class="periodo">2023 &ndash; 2026</span></div>
+    <div>Capacitação de 123 horas: HTML, CSS, JavaScript, React, TypeScript, Node.js, SQL, Git e projetos práticos.</div>
+  </div>
+  <div class="item">
+    <div class="item-titulo"><strong>Desenvolvimento Front-End &mdash; DevQuest (Dev em Dobro)</strong><span class="periodo">2026</span></div>
+    <div>Curso teórico e prático com mais de 80 horas de carga horária.</div>
+  </div>
+  <div class="item">
+    <div class="item-titulo"><strong>Desenvolvimento Back-End &mdash; DevQuest (Dev em Dobro)</strong><span class="periodo">2026</span></div>
+    <div>Curso teórico e prático com mais de 20 horas de carga horária.</div>
+  </div>
+  <div class="item">
+    <div class="item-titulo"><strong>Marketing Pessoal para Programadores &mdash; DevQuest (Dev em Dobro)</strong><span class="periodo">2026</span></div>
+    <div>Construção de currículo, LinkedIn, GitHub e portfólio.</div>
+  </div>
+
+  <!-- ===== PROJETOS ===== -->
+  <h2>Projetos</h2>
+
+  <div class="item">
+    <div class="item-titulo"><strong>Plataforma de Monitoramento &mdash; AIOTI Soluções</strong></div>
+    <div>Dashboard em produção para clientes da empresa acompanharem seus equipamentos industriais. Desenvolvida com Python na AWS, banco PostgreSQL e login com segurança JWT.</div>
+  </div>
+
+  <div class="item">
+    <div class="item-titulo"><strong>Loja Colmeia Encantada</strong> <span class="periodo"><a href="https://gyshro.github.io/Colmeia/">gyshro.github.io/Colmeia</a></span></div>
+    <div>Loja online de moda infantil desenvolvida para cliente: vitrine com fotos reais, filtros por categoria, animações com GSAP e fluxo de pagamento em JavaScript e Node.js.</div>
+  </div>
+
+  <div class="item">
+    <div class="item-titulo"><strong>Site Sabtec</strong> <span class="periodo"><a href="https://gyshro.github.io/Sabtec/">gyshro.github.io/Sabtec</a></span></div>
+    <div>Site institucional desenvolvido para a gráfica Sabtec, com chatbot de atendimento integrado e layout responsivo para celular.</div>
+  </div>
+
+  <div class="item">
+    <div class="item-titulo"><strong>Agente de Atendimento com IA</strong></div>
+    <div>Chatbot que qualifica leads automaticamente, faz perguntas objetivas e envia o resultado por Telegram e planilha Google. Construído com Python e Streamlit, em uso como produto para pequenos negócios.</div>
+  </div>
+
+  <div class="item">
+    <div class="item-titulo"><strong>Projeto Subsilence &mdash; Festival de Robótica do SESI</strong></div>
+    <div>Site que apresenta soluções para silenciar hélices de embarcações e reduzir a poluição sonora marinha. Atuei como líder de uma equipe de quatro pessoas, com entrega em cerca de um mês.</div>
+  </div>
+
+  <div class="item">
+    <div class="item-titulo"><strong>Rede Social autoral</strong></div>
+    <div>Projeto pessoal que recria uma rede social inspirada em Facebook, Instagram e Orkut, com estética criativa de personagens customizáveis em pixel art.</div>
+  </div>
+
+  <!-- ===== IDIOMAS ===== -->
+  <h2>Idiomas</h2>
+  <div class="idiomas">
+    <div><b>Inglês:</b> Avançado</div>
+    <div><b>Espanhol:</b> Intermediário</div>
+  </div>
+
+  <!-- ===== EXPERIÊNCIA ADJACENTE ===== -->
+  <div class="adjacente">
+    <h2>Experiência Adjacente</h2>
+    <div class="nota">Experiência fora da área de tecnologia.</div>
+    <div class="item">
+      <div class="item-titulo"><strong>Dom Alejandro Delivery</strong><span class="periodo">09/2020 &ndash; 01/2021</span></div>
+      <div class="subtitulo">Atendente</div>
+      <ul>
+        <li>Atendimento ao cliente e apoio à operação do restaurante, com trabalho em equipe e rotina sob demanda.</li>
+      </ul>
+    </div>
+  </div>
+
+</body>
+</html>

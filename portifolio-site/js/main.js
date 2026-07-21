@@ -196,15 +196,17 @@ gsap.to(".cracha-brilho", { xPercent: 240, duration: 1.4, ease: "power2.inOut", 
    ========================================================= */
 const grid = $("#projetos-grid");
 const filtros = $("#filtros");
-const categorias = ["Todos", ...new Set(PROJETOS.map((p) => p.categoria))];
+/* categoria pode ser string ou array de strings (projeto em mais de um filtro) */
+const catsDe = (p) => (Array.isArray(p.categoria) ? p.categoria : [p.categoria]);
+const categorias = ["Todos", ...new Set(PROJETOS.flatMap(catsDe))];
 
 function renderProjetos(cat) {
-  const lista = cat === "Todos" ? PROJETOS : PROJETOS.filter((p) => p.categoria === cat);
+  const lista = cat === "Todos" ? PROJETOS : PROJETOS.filter((p) => catsDe(p).includes(cat));
   grid.innerHTML = lista.map((p) => `
     <article class="card" style="--c:${p.cor}">
       <div class="card-capa">
         ${p.capa ? `<img src="${p.capa}" alt="${p.titulo}"${p.capaContain ? ' class="contain"' : ""} loading="lazy" decoding="async" />` : ""}
-        <span class="card-cat">${p.categoria}</span>
+        <span class="card-cat">${catsDe(p)[0]}</span>
       </div>
       <div class="card-corpo">
         <h3>${p.titulo}</h3>

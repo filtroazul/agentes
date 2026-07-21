@@ -8,7 +8,7 @@ const PERFIL = {
   titulo: "Desenvolvedor Full Stack",
   local: "Fortaleza, CE, Brasil",
   bio: "Criando websites modernos com visual limpo, responsivo e elegante. Transformo ideias e design em experiências digitais que funcionam.",
-  cv: "assets/cv-maxwell.pdf",       // ← coloque seu CV em PDF nessa pasta
+  cv: "assets/curriculo.pdf",
   frases: [                          // ← frases do efeito de digitação do hero
     "Full Stack Developer",
     "Backend e Frontend",
@@ -118,7 +118,7 @@ const PROJETOS = [
   {
     titulo: "Este Portfólio",
     desc: "Site pessoal com teclado 3D interativo, crachá com física e animações de scroll, feito do zero, sem frameworks.",
-    categoria: "JavaScript",
+    categoria: ["Front-end", "JavaScript"],
     stack: ["HTML", "CSS", "JavaScript", "GSAP"],
     cor: "#6d54c4",
     link: "",
