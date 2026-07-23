@@ -2,55 +2,208 @@
      WIDGET DE ATENDIMENTO — colar este bloco INTEIRO no index
      do site, logo antes de </body>. Não precisa de mais nada.
 
+     Ele se adapta sozinho à cor do site:
+       1. usa data-accent="#hex" se você definir (opcional);
+       2. senão pega a variável CSS --cor-primaria / --primary / --accent;
+       3. senão puxa a cor de um botão/link de destaque da página;
+       4. senão cai num tom neutro elegante.
+
      Pra trocar o agente/ramo: mude o parâmetro `agente=` na URL
      dentro de data-chat-url (ex.: agente=corretor_imoveis).
      ============================================================ -->
-<div id="ah-chat-widget" data-chat-url="https://agentes-s68ksrzb97z5q4qqp7f8nq.streamlit.app/?agente=atendimento&embed=true"></div>
+<div id="ah-chat-widget"
+     data-chat-url="https://agentes-s68ksrzb97z5q4qqp7f8nq.streamlit.app/?agente=atendimento&embed=true"
+     data-accent=""
+     data-titulo="Atendimento"
+     data-subtitulo="Responde na hora"></div>
 <script>
 (function () {
   var root = document.getElementById('ah-chat-widget');
   var chatUrl = root.getAttribute('data-chat-url');
+  var titulo = root.getAttribute('data-titulo') || 'Atendimento';
+  var subtitulo = root.getAttribute('data-subtitulo') || 'Responde na hora';
+
+  // ---- descobre a cor de destaque do site -------------------------------
+  function limpaCor(c) {
+    if (!c) return '';
+    c = c.trim();
+    if (!c || c === 'transparent' || c === 'rgba(0, 0, 0, 0)') return '';
+    // ignora branco/preto/cinza puros — não servem de destaque
+    var m = c.match(/rgba?\(([^)]+)\)/);
+    if (m) {
+      var p = m[1].split(',').map(function (x) { return parseFloat(x); });
+      if (p[3] !== undefined && p[3] < 0.2) return '';
+      var r = p[0], g = p[1], b = p[2];
+      var max = Math.max(r, g, b), min = Math.min(r, g, b);
+      if (max > 245 && min > 245) return '';        // quase branco
+      if (max < 32) return '';                        // quase preto
+      if (max - min < 12 && max > 120 && max < 210) return ''; // cinza
+    }
+    return c;
+  }
+
+  function varCss(nome) {
+    return limpaCor(getComputedStyle(document.documentElement).getPropertyValue(nome));
+  }
+
+  function achaAccent() {
+    var direto = limpaCor(root.getAttribute('data-accent'));
+    if (direto) return direto;
+
+    var vars = ['--cor-primaria', '--primary', '--accent', '--brand',
+                '--cor-destaque', '--color-primary', '--main-color'];
+    for (var i = 0; i < vars.length; i++) {
+      var v = varCss(vars[i]);
+      if (v) return v;
+    }
+
+    // puxa a cor de fundo de um elemento de destaque real da página
+    var alvos = document.querySelectorAll(
+      'header a, nav a, .btn, button, .cta, [class*="botao"], [class*="button"], a[class*="btn"]');
+    for (var j = 0; j < alvos.length && j < 40; j++) {
+      var el = alvos[j];
+      if (el.closest('#ah-chat-widget')) continue;
+      var cs = getComputedStyle(el);
+      var bg = limpaCor(cs.backgroundColor);
+      if (bg) return bg;
+    }
+    // por último, tenta a cor de um link comum
+    var link = document.querySelector('a');
+    if (link) {
+      var col = limpaCor(getComputedStyle(link).color);
+      if (col) return col;
+    }
+    return '#2d8a24'; // fallback neutro/elegante
+  }
+
+  var accent = achaAccent();
 
   var style = document.createElement('style');
   style.textContent =
-    '#ah-chat-btn{position:fixed;right:24px;bottom:24px;width:60px;height:60px;' +
-    'border-radius:50%;border:0;cursor:pointer;background:#16a34a;' +
-    'box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:99999;display:flex;' +
-    'align-items:center;justify-content:center;transition:transform .15s}' +
-    '#ah-chat-btn:hover{transform:scale(1.06)}' +
-    '#ah-chat-btn svg{width:28px;height:28px;stroke:#fff;fill:none;' +
-    'stroke-width:2;stroke-linecap:round;stroke-linejoin:round}' +
-    '#ah-chat-box{position:fixed;right:24px;bottom:96px;width:380px;height:560px;' +
-    'border:1px solid #ddd;border-radius:16px;overflow:hidden;display:none;' +
-    'box-shadow:0 12px 40px rgba(0,0,0,.25);background:#fff;z-index:99999}' +
-    '#ah-chat-box.aberto{display:block}' +
-    '#ah-chat-box iframe{width:100%;height:100%;border:0}' +
-    '@media (max-width:480px){#ah-chat-box{right:8px;left:8px;width:auto;height:70vh}}';
+    '#ah-chat-btn{position:fixed;right:24px;bottom:24px;width:58px;height:58px;' +
+    'border-radius:18px;border:0;cursor:pointer;background:var(--ah-accent);' +
+    'box-shadow:0 10px 30px var(--ah-glow),0 2px 6px rgba(0,0,0,.12);z-index:99999;display:flex;' +
+    'align-items:center;justify-content:center;transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s}' +
+    '#ah-chat-btn:hover{transform:translateY(-3px) scale(1.04)}' +
+    '#ah-chat-btn:active{transform:scale(.96)}' +
+    '#ah-chat-btn svg{width:26px;height:26px;stroke:var(--ah-on-accent);fill:none;' +
+    'stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}' +
+    '#ah-chat-btn::after{content:"";position:absolute;inset:0;border-radius:18px;' +
+    'box-shadow:0 0 0 0 var(--ah-glow);animation:ah-pulso 2.6s ease-out infinite}' +
+    '@keyframes ah-pulso{0%{box-shadow:0 0 0 0 var(--ah-glow)}70%,100%{box-shadow:0 0 0 16px transparent}}' +
+
+    '#ah-chat-box{position:fixed;right:24px;bottom:94px;width:374px;max-width:calc(100vw - 32px);' +
+    'height:min(568px,78vh);border-radius:22px;overflow:hidden;' +
+    'opacity:0;transform:translateY(14px) scale(.98);pointer-events:none;' +
+    'transition:opacity .26s ease,transform .26s cubic-bezier(.34,1.4,.64,1);' +
+    'background:rgba(255,255,255,.72);' +
+    '-webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6);' +
+    'border:1px solid rgba(255,255,255,.6);' +
+    'box-shadow:0 24px 70px rgba(15,23,42,.28),inset 0 1px 0 rgba(255,255,255,.7);z-index:99999;' +
+    'display:flex;flex-direction:column}' +
+    '#ah-chat-box.aberto{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}' +
+
+    '#ah-chat-head{display:flex;align-items:center;gap:11px;padding:13px 15px;' +
+    'background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.15));' +
+    'border-bottom:1px solid rgba(15,23,42,.06)}' +
+    '#ah-chat-head .ah-av{width:38px;height:38px;border-radius:12px;background:var(--ah-accent);' +
+    'display:flex;align-items:center;justify-content:center;flex:0 0 auto;' +
+    'box-shadow:0 4px 12px var(--ah-glow)}' +
+    '#ah-chat-head .ah-av svg{width:20px;height:20px;stroke:var(--ah-on-accent);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}' +
+    '#ah-chat-head .ah-txt{display:flex;flex-direction:column;line-height:1.25;min-width:0}' +
+    '#ah-chat-head .ah-t{font-weight:700;font-size:.95rem;color:#0f172a;' +
+    'font-family:inherit;letter-spacing:-.01em}' +
+    '#ah-chat-head .ah-s{font-size:.74rem;color:#475569;display:flex;align-items:center;gap:5px}' +
+    '#ah-chat-head .ah-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;' +
+    'box-shadow:0 0 0 3px rgba(34,197,94,.2)}' +
+    '#ah-chat-head .ah-x{margin-left:auto;width:30px;height:30px;border:0;border-radius:9px;' +
+    'background:rgba(15,23,42,.05);color:#475569;cursor:pointer;font-size:17px;line-height:1;' +
+    'display:flex;align-items:center;justify-content:center;transition:background .15s}' +
+    '#ah-chat-head .ah-x:hover{background:rgba(15,23,42,.11)}' +
+
+    '#ah-chat-frame{flex:1;position:relative;background:#fff}' +
+    '#ah-chat-box iframe{width:100%;height:100%;border:0;display:block}' +
+    '@media (max-width:480px){#ah-chat-box{right:8px;left:8px;width:auto;bottom:88px;height:74vh}' +
+    '#ah-chat-btn{right:16px;bottom:16px}}';
   document.head.appendChild(style);
+
+  // define as variáveis de cor derivadas do accent
+  root.style.setProperty('--ah-accent', accent);
+  root.style.setProperty('--ah-glow', mescla(accent, .38));
+  root.style.setProperty('--ah-on-accent', contraste(accent));
+  // aplica no :root pra CSS enxergar
+  document.documentElement.style.setProperty('--ah-accent', accent);
+  document.documentElement.style.setProperty('--ah-glow', mescla(accent, .38));
+  document.documentElement.style.setProperty('--ah-on-accent', contraste(accent));
+
+  // ---- helpers de cor ---------------------------------------------------
+  function rgbDe(c) {
+    var m = c.match(/rgba?\(([^)]+)\)/);
+    if (m) { var p = m[1].split(',').map(parseFloat); return [p[0], p[1], p[2]]; }
+    m = c.replace('#', '');
+    if (m.length === 3) m = m[0] + m[0] + m[1] + m[1] + m[2] + m[2];
+    if (m.length >= 6) return [parseInt(m.substr(0,2),16), parseInt(m.substr(2,2),16), parseInt(m.substr(4,2),16)];
+    return [45, 138, 36];
+  }
+  function mescla(c, a) { var r = rgbDe(c); return 'rgba(' + r[0] + ',' + r[1] + ',' + r[2] + ',' + a + ')'; }
+  function contraste(c) {
+    var r = rgbDe(c);
+    var lum = (0.299 * r[0] + 0.587 * r[1] + 0.114 * r[2]);
+    return lum > 165 ? '#0f172a' : '#ffffff';
+  }
+
+  var iconChat = '<svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
+  var iconClose = '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
 
   var btn = document.createElement('button');
   btn.id = 'ah-chat-btn';
   btn.setAttribute('aria-label', 'Falar com o atendimento');
-  var iconChat = '<svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
-  var iconClose = '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
   btn.innerHTML = iconChat;
 
   var box = document.createElement('div');
   box.id = 'ah-chat-box';
+  box.innerHTML =
+    '<div id="ah-chat-head">' +
+      '<div class="ah-av">' + iconChat + '</div>' +
+      '<div class="ah-txt">' +
+        '<span class="ah-t">' + titulo + '</span>' +
+        '<span class="ah-s"><span class="ah-dot"></span>' + subtitulo + '</span>' +
+      '</div>' +
+      '<button class="ah-x" aria-label="Fechar">&times;</button>' +
+    '</div>' +
+    '<div id="ah-chat-frame"></div>';
+
+  var frameWrap = box.querySelector('#ah-chat-frame');
+  var fechar = box.querySelector('.ah-x');
   var carregado = false;
 
-  btn.addEventListener('click', function () {
+  function paraHex(c) {
+    var r = rgbDe(c);
+    return r.map(function (n) { return ('0' + Math.round(n).toString(16)).slice(-2); }).join('');
+  }
+
+  function toggle() {
     // iframe só carrega no 1º clique — não pesa o carregamento do site
     if (!carregado) {
+      // repassa a cor detectada pro chat lá dentro adaptar-se ao site
+      var src = chatUrl;
+      if (chatUrl.indexOf('cor=') === -1) {
+        src += (chatUrl.indexOf('?') === -1 ? '?' : '&') + 'cor=' + paraHex(accent);
+      }
       var frame = document.createElement('iframe');
-      frame.src = chatUrl;
+      frame.src = src;
       frame.title = 'Assistente de atendimento';
-      box.appendChild(frame);
+      frame.allow = 'microphone';
+      frameWrap.appendChild(frame);
       carregado = true;
     }
-    box.classList.toggle('aberto');
-    btn.innerHTML = box.classList.contains('aberto') ? iconClose : iconChat;
-  });
+    var abre = !box.classList.contains('aberto');
+    box.classList.toggle('aberto', abre);
+    btn.innerHTML = abre ? iconClose : iconChat;
+  }
+
+  btn.addEventListener('click', toggle);
+  fechar.addEventListener('click', toggle);
 
   document.body.appendChild(box);
   document.body.appendChild(btn);

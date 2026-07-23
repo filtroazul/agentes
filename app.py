@@ -24,6 +24,60 @@ AGENTE_DEMO = _params.get("agente", "")
 _NOME_PARAM = (_params.get("nome", "") or _params.get("corretor", "") or "").strip()
 NOME_PROFISSIONAL = _NOME_PARAM or "Ricardo Almeida"
 
+# --- cor de destaque: adapta o chat à identidade do site onde ele é embutido ---
+# O widget do site passa a cor detectada em ?cor=RRGGBB (com ou sem #). Se não
+# vier, usa um padrão por agente; por último, um tom neutro.
+
+_CORES_PADRAO_AGENTE = {
+    "aioti": "#2d8a24",
+    "corretor_imoveis": "#2563eb",
+}
+_COR_NEUTRA = "#3b6cb7"
+
+
+def _hex_valido(valor: str) -> str:
+    """Aceita 'RRGGBB' ou '#RRGGBB' (também 3 dígitos). Vazio se inválido."""
+    v = (valor or "").strip().lstrip("#")
+    if len(v) == 3:
+        v = "".join(c * 2 for c in v)
+    if len(v) == 6 and all(c in "0123456789abcdefABCDEF" for c in v):
+        return "#" + v.lower()
+    return ""
+
+
+def _rgb(cor_hex: str):
+    h = cor_hex.lstrip("#")
+    return int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+
+
+def _rgba(cor_hex: str, alfa: float) -> str:
+    r, g, b = _rgb(cor_hex)
+    return f"rgba({r}, {g}, {b}, {alfa})"
+
+
+def _luminancia(cor_hex: str) -> float:
+    r, g, b = _rgb(cor_hex)
+    return 0.299 * r + 0.587 * g + 0.114 * b
+
+
+def _escurece(cor_hex: str, fator: float = 0.72) -> str:
+    r, g, b = _rgb(cor_hex)
+    return "#%02x%02x%02x" % (int(r * fator), int(g * fator), int(b * fator))
+
+
+def _contraste(cor_hex: str) -> str:
+    return "#0f172a" if _luminancia(cor_hex) > 165 else "#ffffff"
+
+
+COR_ACCENT = (
+    _hex_valido(_params.get("cor", ""))
+    or _CORES_PADRAO_AGENTE.get(AGENTE_DEMO, "")
+    or _COR_NEUTRA
+)
+# Se a cor for clara, escurece pro texto/ícone ter contraste no fundo branco.
+COR_ACCENT_TXT = COR_ACCENT if _luminancia(COR_ACCENT) < 150 else _escurece(COR_ACCENT, 0.6)
+COR_ON_ACCENT = _contraste(COR_ACCENT)
+
 # --- ícones SVG (traço fino, sem emoji) ----------------------------------------
 
 _SVG_ATTRS = (
@@ -54,8 +108,8 @@ _PATHS_PRANCHETA = (
     "<path d='M9 12h6'/><path d='M9 16h4'/>"
 )
 
-AVATAR_ASSISTENTE = _svg_uri(_PATHS_ATENDENTE, "#E8985E")
-AVATAR_PESSOA = _svg_uri(_PATHS_PESSOA, "#9BA3B2")
+AVATAR_ASSISTENTE = _svg_uri(_PATHS_ATENDENTE, COR_ACCENT_TXT)
+AVATAR_PESSOA = _svg_uri(_PATHS_PESSOA, "#94a3b8")
 
 st.set_page_config(
     page_title=(f"Atendimento — {_NOME_PARAM}" if _NOME_PARAM else "Atendimento")
@@ -87,161 +141,197 @@ ICONES = ["🤖", "🏠", "📊", "🔎", "✍️", "🧠", "💼", "🛠️", "
 # --- estilo ---------------------------------------------------------------
 
 st.markdown(
-    """
+    f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500&display=swap');
 
-    html, body, [class*="css"] { font-family: 'IBM Plex Sans', sans-serif; }
-    h1, h2, h3 { font-family: 'Sora', sans-serif !important; letter-spacing: -0.5px; }
+    :root {{
+        --accent: {COR_ACCENT};
+        --accent-txt: {COR_ACCENT_TXT};
+        --on-accent: {COR_ON_ACCENT};
+        --accent-08: {_rgba(COR_ACCENT, 0.08)};
+        --accent-14: {_rgba(COR_ACCENT, 0.14)};
+        --accent-22: {_rgba(COR_ACCENT, 0.22)};
+        --accent-32: {_rgba(COR_ACCENT, 0.32)};
+    }}
 
-    /* barra lateral */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #14181F 0%, #0F1115 100%);
-        border-right: 1px solid #262B35;
-    }
-    [data-testid="stSidebar"] h1 {
+    html, body, [class*="css"] {{ font-family: 'IBM Plex Sans', sans-serif; }}
+    h1, h2, h3 {{ font-family: 'Sora', sans-serif !important; letter-spacing: -0.5px; }}
+
+    /* fundo geral: branco leitoso com um véu suave da cor do site */
+    [data-testid="stAppViewContainer"] {{
+        background:
+            radial-gradient(1200px 500px at 100% -10%, var(--accent-08), transparent 60%),
+            radial-gradient(900px 500px at -10% 110%, var(--accent-08), transparent 55%),
+            linear-gradient(180deg, #ffffff 0%, #f4f7fb 100%);
+    }}
+
+    /* barra lateral (só no modo admin) */
+    [data-testid="stSidebar"] {{
+        background: linear-gradient(180deg, #ffffff 0%, #f2f5fa 100%);
+        border-right: 1px solid #e6ebf2;
+    }}
+    [data-testid="stSidebar"] h1 {{
         font-size: 1.35rem;
-        background: linear-gradient(90deg, #E8985E, #E5C07B);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
+        color: var(--accent-txt);
+    }}
 
-    /* cartão do agente */
-    .agent-card {
-        background: linear-gradient(135deg, #1B202A 0%, #171B22 100%);
-        border: 1px solid #2A3040;
-        border-radius: 16px;
+    /* cartão do agente — vidro branco */
+    .agent-card {{
+        background: rgba(255, 255, 255, 0.72);
+        -webkit-backdrop-filter: blur(16px) saturate(1.4);
+        backdrop-filter: blur(16px) saturate(1.4);
+        border: 1px solid rgba(255, 255, 255, 0.85);
+        border-radius: 18px;
         padding: 1.2rem 1.5rem;
         margin-bottom: 1rem;
-    }
-    .agent-card .nome {
+        box-shadow: 0 10px 30px rgba(20, 33, 61, 0.08);
+    }}
+    .agent-card .nome {{
         font-family: 'Sora', sans-serif;
-        font-size: 1.5rem;
+        font-size: 1.4rem;
         font-weight: 700;
-        color: #F3EFE6;
-    }
-    .agent-card .desc { color: #9BA3B2; margin-top: 2px; }
-    .agent-card.demo { display: flex; align-items: center; gap: 16px; }
-    .icone-tile {
+        color: #16202e;
+        letter-spacing: -0.02em;
+    }}
+    .agent-card .desc {{ color: #5a6b7e; margin-top: 3px; font-size: 0.92rem; }}
+    .agent-card.demo {{ display: flex; align-items: center; gap: 15px; }}
+    .icone-tile {{
         flex: 0 0 48px;
         width: 48px; height: 48px;
-        border-radius: 13px;
-        background: linear-gradient(160deg, #2B2015 0%, #241C14 100%);
-        border: 1px solid #7A5636;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        background: linear-gradient(160deg, var(--accent), {_escurece(COR_ACCENT, 0.82)});
+        border: 1px solid var(--accent-32);
+        box-shadow: 0 6px 16px var(--accent-32);
         display: flex; align-items: center; justify-content: center;
-    }
+    }}
 
-    /* modo demo: moldura dupla (card dentro de card) + entrada suave */
-    .demo-shell {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+    /* modo demo: moldura de vidro + entrada suave */
+    .demo-shell {{
+        background: rgba(255, 255, 255, 0.55);
+        -webkit-backdrop-filter: blur(20px) saturate(1.5);
+        backdrop-filter: blur(20px) saturate(1.5);
+        border: 1px solid rgba(255, 255, 255, 0.9);
         border-radius: 22px;
         padding: 6px;
         margin-bottom: 1.1rem;
-        box-shadow: 0 18px 48px rgba(8, 10, 14, 0.45);
+        box-shadow: 0 16px 44px rgba(20, 33, 61, 0.12);
         animation: demo-entrada 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-    .demo-shell .agent-card.demo {
+    }}
+    .demo-shell .agent-card.demo {{
         margin-bottom: 0;
-        border-radius: 16px;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    }
-    @keyframes demo-entrada {
-        from { opacity: 0; transform: translateY(14px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
-    .status-pill {
+        border-radius: 17px;
+        box-shadow: none;
+        background: rgba(255, 255, 255, 0.6);
+    }}
+    @keyframes demo-entrada {{
+        from {{ opacity: 0; transform: translateY(14px); }}
+        to   {{ opacity: 1; transform: translateY(0); }}
+    }}
+    .status-pill {{
         display: inline-flex; align-items: center; gap: 7px;
-        margin-top: 9px; padding: 3px 12px;
+        margin-top: 10px; padding: 4px 13px;
         border-radius: 999px;
-        font-size: 0.72rem; font-weight: 500;
-        color: #7ED9A7;
-        background: rgba(62, 156, 107, 0.12);
-        border: 1px solid rgba(62, 156, 107, 0.35);
-    }
-    .status-pill .dot {
+        font-size: 0.72rem; font-weight: 600;
+        color: #12805a;
+        background: rgba(34, 197, 94, 0.12);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }}
+    .status-pill .dot {{
         width: 7px; height: 7px; border-radius: 999px;
-        background: #57C98A;
+        background: #22c55e;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
         animation: pulso 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-    }
-    @keyframes pulso {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50%      { opacity: 0.45; transform: scale(0.8); }
-    }
+    }}
+    @keyframes pulso {{
+        0%, 100% {{ opacity: 1; transform: scale(1); }}
+        50%      {{ opacity: 0.45; transform: scale(0.8); }}
+    }}
 
     /* chips de metadados */
-    .chip {
+    .chip {{
         display: inline-block;
         padding: 3px 12px;
         margin: 8px 6px 0 0;
         border-radius: 999px;
         font-size: 0.75rem;
         font-weight: 500;
-        border: 1px solid #3A4152;
-        color: #C9CFDB;
-        background: #202634;
-    }
-    .chip.accent { border-color: #7A5636; color: #E8985E; background: #241C14; }
+        border: 1px solid #dfe5ee;
+        color: #45566a;
+        background: #eef2f8;
+    }}
+    .chip.accent {{ border-color: var(--accent-32); color: var(--accent-txt); background: var(--accent-08); }}
 
-    /* mensagens do chat */
-    [data-testid="stChatMessage"] {
-        border-radius: 14px;
-        border: 1px solid #232935;
-        background: #151922;
+    /* mensagens do chat — bolhas de vidro */
+    [data-testid="stChatMessage"] {{
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.72);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
         padding: 0.6rem 0.9rem;
-        margin-bottom: 0.4rem;
-    }
+        margin-bottom: 0.45rem;
+        box-shadow: 0 4px 16px rgba(20, 33, 61, 0.06);
+    }}
+    /* mensagem do usuário puxa a cor do site */
+    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {{
+        background: var(--accent-08);
+        border-color: var(--accent-22);
+    }}
 
     /* input do chat */
-    [data-testid="stChatInput"] textarea { font-family: 'IBM Plex Sans', sans-serif; }
-    [data-testid="stChatInput"] {
-        border-radius: 14px;
-        border: 1px solid #2A3040;
+    [data-testid="stChatInput"] textarea {{ font-family: 'IBM Plex Sans', sans-serif; }}
+    [data-testid="stChatInput"] {{
+        border-radius: 16px;
+        border: 1px solid #dbe2ec;
+        background: rgba(255, 255, 255, 0.8);
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
         transition: border-color 0.3s cubic-bezier(0.32, 0.72, 0, 1),
                     box-shadow 0.3s cubic-bezier(0.32, 0.72, 0, 1);
-    }
-    [data-testid="stChatInput"]:focus-within {
-        border-color: #E8985E;
-        box-shadow: 0 0 0 1px rgba(232, 152, 94, 0.3);
-    }
+    }}
+    [data-testid="stChatInput"]:focus-within {{
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-22);
+    }}
+    [data-testid="stChatInput"] button {{ color: var(--accent-txt) !important; }}
 
     /* botões */
-    .stButton > button {
-        border-radius: 10px;
-        border: 1px solid #3A4152;
+    .stButton > button {{
+        border-radius: 12px;
+        border: 1px solid #dbe2ec;
         transition: all .15s ease;
-    }
-    .stButton > button:hover {
-        border-color: #E8985E;
-        color: #E8985E;
-    }
+    }}
+    .stButton > button:hover {{
+        border-color: var(--accent);
+        color: var(--accent-txt);
+    }}
 
     /* card do resumo pro corretor (print de venda) */
-    .resumo-card {
-        background: linear-gradient(135deg, #14261C 0%, #101D16 100%);
-        border: 1px solid #3E9C6B;
-        border-radius: 14px;
+    .resumo-card {{
+        background: linear-gradient(135deg, #ffffff 0%, var(--accent-08) 100%);
+        border: 1px solid var(--accent-22);
+        border-radius: 16px;
         padding: 1rem 1.3rem;
         margin: 0.6rem 0;
         line-height: 1.9;
-        color: #DFF5E8;
-        box-shadow: 0 4px 20px rgba(62, 156, 107, 0.18);
-    }
-    .resumo-card .titulo {
+        color: #223142;
+        box-shadow: 0 8px 26px var(--accent-14);
+    }}
+    .resumo-card .titulo {{
         font-family: 'Sora', sans-serif;
         font-weight: 700;
         font-size: 1.05rem;
-        color: #6FD79E;
+        color: var(--accent-txt);
         display: flex;
         align-items: center;
         gap: 8px;
         margin-bottom: 0.4rem;
-        border-bottom: 1px solid #2A4A38;
+        border-bottom: 1px solid var(--accent-22);
         padding-bottom: 0.4rem;
-    }
+    }}
 
-    #MainMenu, footer { visibility: hidden; }
+    #MainMenu, footer, [data-testid="stStatusWidget"] {{ visibility: hidden; }}
     </style>
     """,
     unsafe_allow_html=True,
@@ -282,7 +372,7 @@ def renderizar_mensagem(texto: str) -> None:
 
     linhas = [l.strip() for l in m.group(1).strip().splitlines() if l.strip()]
     titulo_txt = re.sub(r"^📋\s*", "", linhas[0]) if linhas else "RESUMO DO LEAD"
-    icone_titulo = _svg(_PATHS_PRANCHETA, "#6FD79E", 18)
+    icone_titulo = _svg(_PATHS_PRANCHETA, COR_ACCENT_TXT, 18)
     corpo = "<br>".join(html.escape(l) for l in linhas[1:])
     st.markdown(
         f'<div class="resumo-card">'
@@ -482,7 +572,7 @@ if MODO_DEMO:
         f"""
         <div class="demo-shell">
             <div class="agent-card demo">
-                <div class="icone-tile">{_svg(_PATHS_ATENDENTE, "#E8985E", 24)}</div>
+                <div class="icone-tile">{_svg(_PATHS_ATENDENTE, COR_ON_ACCENT, 24)}</div>
                 <div>
                     <div class="nome">{html.escape(titulo_demo)}</div>
                     <div class="desc">{html.escape(subtitulo_demo)}</div>
