@@ -6,13 +6,11 @@ Rodar com:  streamlit run app.py
 import html
 import os
 import re
-from datetime import datetime
 from urllib.parse import quote
 
-import requests
 import streamlit as st
 
-from core import agent, config, tools
+from core import agent, config, leads, tools
 
 # --- modo demo (link pro cliente) vs modo admin -------------------------------
 # ?agente=corretor_imoveis  -> abre direto no chat, sem sidebar de administração
@@ -385,61 +383,11 @@ def renderizar_mensagem(texto: str) -> None:
         st.markdown(depois)
 
 # --- envio do lead pra equipe ---------------------------------------------------
-# Destinos configurados via secrets (nenhum configurado = não envia, sem erro):
+# A lógica de envio (Telegram/webhook) vive em core/leads.py, compartilhada com
+# o bot do Telegram. Configuração via secrets/variáveis de ambiente:
 #   TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID  -> mensagem no Telegram da equipe
 #   LEADS_WEBHOOK_URL                      -> POST JSON (Google Sheets, Make, CRM...)
 # Sufixo _<AGENTE> (ex.: TELEGRAM_CHAT_ID_AIOTI) direciona por agente/cliente.
-
-
-def _secret(nome: str) -> str:
-    try:
-        valor = st.secrets.get(nome, "")
-    except Exception:
-        valor = ""
-    return (valor or os.environ.get(nome, "")).strip()
-
-
-def _secret_do_agente(base: str, agente: str) -> str:
-    return _secret(f"{base}_{agente.upper()}") or _secret(base)
-
-
-def enviar_lead(agente: str, resumo: str) -> bool:
-    """Envia o resumo do lead pros destinos configurados. True se algum recebeu."""
-    try:
-        from zoneinfo import ZoneInfo
-
-        agora = datetime.now(ZoneInfo("America/Fortaleza"))
-    except Exception:
-        agora = datetime.now()
-    momento = agora.strftime("%d/%m/%Y %H:%M")
-    enviado = False
-
-    token = _secret("TELEGRAM_BOT_TOKEN")
-    chat_id = _secret_do_agente("TELEGRAM_CHAT_ID", agente)
-    if token and chat_id:
-        try:
-            r = requests.post(
-                f"https://api.telegram.org/bot{token}/sendMessage",
-                json={"chat_id": chat_id, "text": f"🔔 NOVO LEAD · {momento}\n\n{resumo}"},
-                timeout=8,
-            )
-            enviado = enviado or r.ok
-        except Exception:
-            pass
-
-    webhook = _secret_do_agente("LEADS_WEBHOOK_URL", agente)
-    if webhook:
-        try:
-            r = requests.post(
-                webhook,
-                json={"agente": agente, "momento": momento, "resumo": resumo},
-                timeout=8,
-            )
-            enviado = enviado or r.ok
-        except Exception:
-            pass
-
-    return enviado
 
 # --- estado -----------------------------------------------------------------
 
@@ -648,7 +596,7 @@ if pergunta:
             resumo_lead = m_lead.group(1).strip()
             enviados = st.session_state.setdefault("leads_enviados", set())
             chave = (selecionado, hash(resumo_lead))
-            if chave not in enviados and enviar_lead(selecionado, resumo_lead):
+            if chave not in enviados and leads.enviar_lead(selecionado, resumo_lead):
                 enviados.add(chave)
                 st.caption("Resumo enviado para a equipe ✓")
 
