@@ -1,0 +1,16 @@
+[Unit]
+Description=Bot Telegram Leadiot - atendimento de leads (AIOTI)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/agentes
+EnvironmentFile=/etc/leadiot-bot.env
+ExecStart=/home/ubuntu/agentes/.venv/bin/python bot_telegram.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
