@@ -40,16 +40,16 @@ ssh -i "$env:USERPROFILE\Downloads\ssh-key.key" ubuntu@SEU_IP_PUBLICO
 
 ## Parte 4 — Instalar o bot (dentro da VM)
 
-```bash
-# baixa só o script de setup e roda
-curl -O https://raw.githubusercontent.com/filtroazul/agentes/main/deploy/setup.sh
-bash setup.sh
-```
+O repositório é privado, então clone com autenticação primeiro. Quando o
+`git clone` pedir **senha**, cole um **token do GitHub** (crie em github.com →
+Settings → Developer settings → Fine-grained tokens → acesso de leitura ao
+repo `agentes`); o usuário é `filtroazul`.
 
-O `setup.sh` instala tudo e baixa o código. Como o repositório é privado, o
-`git clone` vai pedir **usuário** (`filtroazul`) e **senha** — cole um
-**token do GitHub** (crie em github.com → Settings → Developer settings →
-Fine-grained tokens → acesso de leitura ao repo `agentes`).
+```bash
+sudo apt-get update -y && sudo apt-get install -y git
+git clone https://filtroazul@github.com/filtroazul/agentes.git ~/agentes
+bash ~/agentes/deploy/setup.sh      # instala deps e o ambiente virtual
+```
 
 Depois, configure as chaves e ligue o serviço (uma vez só):
 
