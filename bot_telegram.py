@@ -18,7 +18,6 @@ Rodar:  python bot_telegram.py
 import os
 import sys
 import time
-import tomllib
 from pathlib import Path
 
 import requests
@@ -36,6 +35,14 @@ def _carregar_secrets_toml() -> None:
     ambiente, então variáveis explícitas continuam tendo prioridade."""
     if not SECRETS_TOML.exists():
         return
+    try:
+        import tomllib  # Python 3.11+
+    except ModuleNotFoundError:
+        try:
+            import tomli as tomllib  # backport para Python <= 3.10
+        except ModuleNotFoundError:
+            print("Aviso: sem tomllib/tomli; use variáveis de ambiente.")
+            return
     try:
         with open(SECRETS_TOML, "rb") as f:
             dados = tomllib.load(f)
