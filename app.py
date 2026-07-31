@@ -357,16 +357,23 @@ RE_RESUMO = re.compile(
 )
 
 
+def escapar_cifrao(texto: str) -> str:
+    """O markdown do Streamlit lê `$...$` como LaTeX: dois preços em `R$` na mesma
+    frase viram fórmula (o miolo sai em fonte de equação). Escapar o cifrão
+    mantém o preço como texto normal."""
+    return re.sub(r"(?<!\\)\$", r"\\$", texto)
+
+
 def renderizar_mensagem(texto: str) -> None:
     """Markdown normal, mas o bloco RESUMO vira um card destacado."""
     m = RE_RESUMO.search(texto)
     if not m:
-        st.markdown(texto)
+        st.markdown(escapar_cifrao(texto))
         return
 
     antes = texto[: m.start()].strip()
     if antes:
-        st.markdown(antes)
+        st.markdown(escapar_cifrao(antes))
 
     linhas = [l.strip() for l in m.group(1).strip().splitlines() if l.strip()]
     titulo_txt = re.sub(r"^📋\s*", "", linhas[0]) if linhas else "RESUMO DO LEAD"
@@ -380,7 +387,7 @@ def renderizar_mensagem(texto: str) -> None:
 
     depois = texto[m.end() :].strip().lstrip("-").strip()
     if depois:
-        st.markdown(depois)
+        st.markdown(escapar_cifrao(depois))
 
 # --- envio do lead pra equipe ---------------------------------------------------
 # A lógica de envio (Telegram/webhook) vive em core/leads.py, compartilhada com
@@ -571,7 +578,7 @@ if pergunta:
 
     historico.append({"role": "user", "content": pergunta})
     with st.chat_message("user", avatar=AVATAR_PESSOA):
-        st.markdown(pergunta)
+        st.markdown(escapar_cifrao(pergunta))
 
     # personaliza o nome do profissional no prompt sem alterar o agents.yaml
     cfg_exec = dict(cfg)
