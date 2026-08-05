@@ -1,0 +1,35 @@
+name: keep-streamlit-awake
+
+# O Streamlit Community Cloud (plano gratis) hiberna o app apos alguns dias sem
+# acesso e mostra a tela "Zzzz... this app has gone to sleep". Este workflow bate
+# no app de tempos em tempos pra ele nunca ficar ocioso o bastante pra dormir.
+#
+# Observacao honesta: o agendador do GitHub Actions NAO e pontual — em horario de
+# pico ele atrasa (as vezes 10-20 min). Pra keep-alive isso e aceitavel. Se um dia
+# o app dormir mesmo assim, o caminho mais robusto e o UptimeRobot (monitor externo
+# gratuito batendo na mesma URL a cada 5 min).
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # a cada ~10 minutos
+  workflow_dispatch: {}       # permite rodar na mao pra testar (aba Actions -> Run workflow)
+
+# se um ping ainda estiver rodando quando o proximo comecar, cancela o antigo
+concurrency:
+  group: keep-alive
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Acordar/manter o app do Streamlit
+        run: |
+          APP="https://agentes-s68ksrzb97z5q4qqp7f8nq.streamlit.app"
+
+          # 1) endpoint de saude: mantem o container quente
+          echo "health -> $(curl -sS -m 30 -o /dev/null -w '%{http_code}' "$APP/_stcore/health" || echo falhou)"
+
+          # 2) a pagina do app em modo cliente (sem cair no admin): gera trafego real
+          echo "app    -> $(curl -sS -m 60 -A 'keep-alive-bot' -o /dev/null -w '%{http_code}' "$APP/?agente=atendimento&embed=true" || echo falhou)"
