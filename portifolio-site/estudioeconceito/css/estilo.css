@@ -714,7 +714,14 @@ footer a { color: var(--dourado); }
 @media (max-width: 880px) {
   #provador { padding: 5rem 6vw; }
   .provador-grade { grid-template-columns: 1fr; }
-  .provador-mecha { max-width: 420px; margin: 0 auto; order: -1; }
+  /* largura definida (não esticada pelo grid) pra o aspect-ratio gerar altura:
+     sozinha na linha, sem conteudo em fluxo, a mecha colapsava pra 0 no celular */
+  .provador-mecha {
+    order: -1;
+    justify-self: center;
+    width: min(78vw, 360px);
+    margin: 0 auto;
+  }
 }
 
 /* Movimento reduzido: cortar o que fica repetindo sozinho na tela e o scroll
