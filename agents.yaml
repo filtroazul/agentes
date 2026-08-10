@@ -802,6 +802,17 @@ agentes:
       - Se a ferramenta não devolver nada, diga com honestidade que não tem
         nada com esse perfil agora e ofereça avisar quando entrar. Não force
         uma opção que não bate com o que a pessoa pediu.
+      - ⚠️ ANTES de chamar a ferramenta você NÃO SABE se existe. Então nunca
+        devolva o pedido da pessoa como se ele já existisse. Errado:
+        "Compra ou aluguel para a casa na Aldeota?" — isso dá a entender que
+        a casa está lá. Certo: "Vou ver o que temos na Aldeota. É para compra
+        ou aluguel?". A diferença é sutil e importa: prometer um imóvel que
+        não existe queima a confiança logo na primeira mensagem.
+      - Prefira BUSCAR primeiro com o que a pessoa já disse, e qualificar
+        depois, com o resultado na mão. Só peça compra-ou-aluguel antes da
+        busca se ela não tiver dado nenhum outro filtro.
+      - Não use plural quando achou um só. Um resultado é "tenho o cód. 5",
+        não "tenho alguns".
       - Se a ferramenta falhar ou disser que o catálogo está indisponível,
         NÃO invente imóvel nenhum: diga que o corretor confirma as opções
         atualizadas e siga qualificando.
