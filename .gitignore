@@ -7,8 +7,17 @@ __pycache__/
 .streamlit/secrets.toml
 .env
 
+# Chaves SSH da VM — NUNCA commitar
+*.key
+*.key.pub
+ssh-key-*
+
 # Claude Code (config local da máquina)
 .claude/settings.local.json
+
+# Contagem diária da cota do Groq (core/cota.py). É estado de execução:
+# muda a cada mensagem e não serve pra ninguém no repositório.
+.cota-groq.json
 
 # SO
 Thumbs.db
