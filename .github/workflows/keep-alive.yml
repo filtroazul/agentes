@@ -1,35 +1,54 @@
 name: keep-streamlit-awake
 
-# O Streamlit Community Cloud (plano gratis) hiberna o app apos alguns dias sem
-# acesso e mostra a tela "Zzzz... this app has gone to sleep". Este workflow bate
-# no app de tempos em tempos pra ele nunca ficar ocioso o bastante pra dormir.
+# Mantem o app do Streamlit Community Cloud (plano gratis) fora da tela
+# "Zzzz... this app has gone to sleep".
 #
-# Observacao honesta: o agendador do GitHub Actions NAO e pontual — em horario de
-# pico ele atrasa (as vezes 10-20 min). Pra keep-alive isso e aceitavel. Se um dia
-# o app dormir mesmo assim, o caminho mais robusto e o UptimeRobot (monitor externo
-# gratuito batendo na mesma URL a cada 5 min).
+# ⚠️ A VERSAO ANTERIOR DESTE ARQUIVO FICAVA VERDE SEM FAZER NADA. Ela usava
+# curl, e curl nao acorda Streamlit:
+#   - `/_stcore/health` devolve **303** (redirect pra tela de auth). O ping
+#     nunca chega no container.
+#   - o GET da pagina devolve **200 ate dormindo** — sao ~9 KB de esqueleto
+#     HTML, e o "Zzzz" e desenhado depois, pelo JS.
+# O Streamlit conta atividade por **sessao de websocket**, e quem abre o
+# websocket e o JS da pagina. Por isso agora abrimos um navegador de verdade.
+#
+# O trabalho esta em deploy/acordar-streamlit.py, que tambem roda na mao:
+#     python deploy/acordar-streamlit.py
+#
+# ⚠️ O GitHub DESLIGA workflows agendados em repo sem commit ha 60 dias. Se o
+# app comecar a dormir do nada, conferir isso antes de culpar o script.
 
 on:
   schedule:
-    - cron: "*/10 * * * *"   # a cada ~10 minutos
-  workflow_dispatch: {}       # permite rodar na mao pra testar (aba Actions -> Run workflow)
+    - cron: "*/15 * * * *"   # a cada ~15 min (o agendador do GitHub atrasa 10-20 min em horario de pico)
+  workflow_dispatch: {}       # rodar na mao: aba Actions -> Run workflow
 
-# se um ping ainda estiver rodando quando o proximo comecar, cancela o antigo
 concurrency:
   group: keep-alive
-  cancel-in-progress: true
+  cancel-in-progress: false   # acordar do zero leva ~2 min; nao cortar no meio
 
 jobs:
-  ping:
+  acordar:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 10
     steps:
-      - name: Acordar/manter o app do Streamlit
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache do navegador
+        id: cache-navegador
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}
+
+      - name: Instalar Playwright
         run: |
-          APP="https://agentes-s68ksrzb97z5q4qqp7f8nq.streamlit.app"
+          pip install --quiet playwright
+          playwright install --with-deps chromium
 
-          # 1) endpoint de saude: mantem o container quente
-          echo "health -> $(curl -sS -m 30 -o /dev/null -w '%{http_code}' "$APP/_stcore/health" || echo falhou)"
-
-          # 2) a pagina do app em modo cliente (sem cair no admin): gera trafego real
-          echo "app    -> $(curl -sS -m 60 -A 'keep-alive-bot' -o /dev/null -w '%{http_code}' "$APP/?agente=atendimento&embed=true" || echo falhou)"
+      - name: Acordar o app
+        run: python deploy/acordar-streamlit.py
