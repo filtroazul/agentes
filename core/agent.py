@@ -4,7 +4,7 @@ quando solicitado e repete até obter a resposta final."""
 import json
 import re
 
-from groq import Groq
+from groq import BadRequestError, Groq
 
 from core import tools
 
@@ -29,6 +29,30 @@ def _limpar(texto: str) -> str:
     return _FUNCAO_EM_TEXTO.sub("", texto or "").strip()
 
 
+def _geracao_recusada(erro: BadRequestError) -> str | None:
+    """Extrai o `failed_generation` de um 400 `tool_use_failed`, se for isso.
+
+    ⚠️ Este é um erro do SERVIDOR do Groq, não nosso: eles validam os argumentos
+    da ferramenta contra o schema antes de nos entregar qualquer coisa. Se o
+    modelo mandar `"quartos_min": "3"` (string) num campo integer, o request
+    INTEIRO volta 400 e o cliente lê "assistente temporariamente indisponível".
+    Visto de verdade em 11/08/2026 no ah_imobiliaria, no meio de uma conversa
+    que já estava funcionando — é intermitente, depende do humor do modelo.
+
+    Os schemas já aceitam tipo-união pra evitar a causa comum. Isto aqui é a
+    rede embaixo: o texto recusado ainda contém a chamada que o modelo queria
+    fazer, então dá pra executá-la em vez de perder a conversa.
+    """
+    corpo = getattr(erro, "body", None)
+    if not isinstance(corpo, dict):
+        return None
+    detalhe = corpo.get("error")
+    if not isinstance(detalhe, dict) or detalhe.get("code") != "tool_use_failed":
+        return None
+    gerado = detalhe.get("failed_generation")
+    return gerado if isinstance(gerado, str) else None
+
+
 def responder(api_key: str, config_agente: dict, mensagens: list[dict]) -> str:
     """Roda uma rodada completa do agente e retorna o texto final.
 
@@ -40,15 +64,41 @@ def responder(api_key: str, config_agente: dict, mensagens: list[dict]) -> str:
     schemas = tools.schemas_para(config_agente.get("ferramentas", []))
     conversa = [{"role": "system", "content": config_agente["prompt"]}] + list(mensagens)
 
+    def executar_do_texto(texto: str, escritas: list[tuple[str, str]]) -> None:
+        """Roda as chamadas que o modelo escreveu no texto e alimenta a conversa."""
+        conversa.append({"role": "assistant", "content": _limpar(texto)})
+        for nome, argumentos_json in escritas:
+            try:
+                argumentos = json.loads(argumentos_json)
+            except json.JSONDecodeError:
+                argumentos = {}
+            resultado = tools.executar(nome, argumentos)
+            # Sem `tool_calls` não existe tool_call_id, e a API recusa uma
+            # mensagem de papel "tool" sem ele. Devolvemos o resultado como
+            # contexto do usuário, que ela aceita.
+            conversa.append(
+                {"role": "user", "content": f"[resultado de {nome}]\n{resultado}"}
+            )
+
     for _ in range(MAX_ITERACOES):
-        resposta = client.chat.completions.create(
-            model=config_agente.get("modelo", "llama-3.3-70b-versatile"),
-            messages=conversa,
-            temperature=float(config_agente.get("temperatura", 0.7)),
-            tools=schemas or None,
-            tool_choice="auto" if schemas else None,
-            max_tokens=2048,
-        )
+        try:
+            resposta = client.chat.completions.create(
+                model=config_agente.get("modelo", "llama-3.3-70b-versatile"),
+                messages=conversa,
+                temperature=float(config_agente.get("temperatura", 0.7)),
+                tools=schemas or None,
+                tool_choice="auto" if schemas else None,
+                max_tokens=2048,
+            )
+        except BadRequestError as erro:
+            recusado = _geracao_recusada(erro)
+            escritas = _FUNCAO_EM_TEXTO.findall(recusado or "")
+            if not escritas:
+                raise
+            # O Groq rejeitou o formato, mas a intenção do modelo está legível.
+            executar_do_texto(recusado, escritas)
+            continue
+
         msg = resposta.choices[0].message
 
         # Sem chamadas de ferramenta -> resposta final...
@@ -60,22 +110,7 @@ def responder(api_key: str, config_agente: dict, mensagens: list[dict]) -> str:
             # é executada de verdade e o laço continua, senão a pessoa fica sem
             # a resposta que pediu.
             if escritas and schemas:
-                conversa.append({"role": "assistant", "content": _limpar(texto)})
-                for nome, argumentos_json in escritas:
-                    try:
-                        argumentos = json.loads(argumentos_json)
-                    except json.JSONDecodeError:
-                        argumentos = {}
-                    resultado = tools.executar(nome, argumentos)
-                    # Sem `tool_calls` não existe tool_call_id, e a API recusa
-                    # uma mensagem de papel "tool" sem ele. Devolvemos o
-                    # resultado como contexto do usuário, que ela aceita.
-                    conversa.append(
-                        {
-                            "role": "user",
-                            "content": f"[resultado de {nome}]\n{resultado}",
-                        }
-                    )
+                executar_do_texto(texto, escritas)
                 continue
 
             return _limpar(texto)

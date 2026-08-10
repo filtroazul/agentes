@@ -9,6 +9,7 @@ Para adicionar uma ferramenta nova:
 import ast
 import operator
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -86,6 +87,29 @@ def _segredo(nome: str) -> str:
     return str(_SEGREDOS.get(nome, ""))
 
 
+def _para_numero(valor) -> float:
+    """Converte o que o modelo mandou num número, ou 0 se não der.
+
+    O llama manda coisas como "3", "R$ 200.000", "200 mil" ou "". Um `float()`
+    cru levanta exceção e derruba a busca inteira por causa de um cifrão.
+    """
+    if isinstance(valor, (int, float)):
+        return float(valor)
+    if not isinstance(valor, str):
+        return 0.0
+    texto = valor.strip().lower().replace("r$", "").strip()
+    multiplicador = 1.0
+    if texto.endswith("mil"):
+        multiplicador, texto = 1_000.0, texto[:-3].strip()
+    elif texto.endswith(("milhao", "milhão", "milhoes", "milhões")):
+        multiplicador = 1_000_000.0
+        texto = re.sub(r"milh(a|õ|o)\w*$", "", texto).strip()
+    # "1.250,50" é BR: ponto é milhar, vírgula é decimal.
+    texto = texto.replace(".", "").replace(",", ".")
+    achado = re.search(r"\d+(?:\.\d+)?", texto)
+    return float(achado.group()) * multiplicador if achado else 0.0
+
+
 def buscar_imoveis(
     finalidade: str = "",
     tipo: str = "",
@@ -114,10 +138,12 @@ def buscar_imoveis(
         corpo["p_tipo"] = tipo
     if bairro:
         corpo["p_bairro"] = bairro
-    if preco_max and float(preco_max) > 0:
-        corpo["p_preco_max"] = float(preco_max)
-    if quartos_min and int(quartos_min) > 0:
-        corpo["p_quartos_min"] = int(quartos_min)
+    teto = _para_numero(preco_max)
+    if teto > 0:
+        corpo["p_preco_max"] = teto
+    minimo = _para_numero(quartos_min)
+    if minimo > 0:
+        corpo["p_quartos_min"] = int(minimo)
 
     try:
         resposta = requests.post(
@@ -236,12 +262,19 @@ FERRAMENTAS = {
                             "type": "string",
                             "description": "Bairro ou região de interesse",
                         },
+                        # ⚠️ Tipo-união de propósito. O llama-3.3 manda número
+                        # como string ("3") com frequência, e a validação de
+                        # ferramenta do Groq é do lado DELES: o request inteiro
+                        # volta 400 `tool_use_failed` e o cliente lê "assistente
+                        # indisponível". Aceitar as duas formas e converter aqui
+                        # (ver `_para_numero`) mata o erro na origem. Conferido
+                        # em 11/08/2026 que o Groq aceita tipo-união.
                         "preco_max": {
-                            "type": "number",
+                            "type": ["number", "string"],
                             "description": "Teto de valor em reais. Para aluguel, valor mensal",
                         },
                         "quartos_min": {
-                            "type": "integer",
+                            "type": ["integer", "string"],
                             "description": "Número mínimo de quartos",
                         },
                     },
