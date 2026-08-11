@@ -7,6 +7,14 @@ __pycache__/
 .streamlit/secrets.toml
 .env
 
+# Gravadores de tutorial do painel da Ah Imobiliária: têm a SENHA DE PRODUÇÃO
+# do corretor em texto puro, porque precisam logar de verdade pra gravar o
+# vídeo. Este repositório é PÚBLICO (filtroazul/agentes) e `vendas/` já tem
+# arquivos versionados — sem estas linhas, um `git add .` distraído publica a
+# senha. Conferido em 11/08/2026: nenhum dos dois estava no índice.
+vendas/gravar-tutorial-acesso.py
+vendas/gravar-tutorial-painel.py
+
 # Chaves SSH da VM — NUNCA commitar
 *.key
 *.key.pub
