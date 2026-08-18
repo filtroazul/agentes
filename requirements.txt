@@ -2,3 +2,7 @@ groq>=0.13.0
 streamlit>=1.38.0
 pyyaml>=6.0
 requests>=2.31.0
+
+# Webhook do ManyChat (Instagram DM / WhatsApp) — webhook_manychat.py
+flask>=3.0.0
+gunicorn>=21.2.0  # servidor de produção (Linux/VM); ignore no Windows

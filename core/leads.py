@@ -28,6 +28,12 @@ def extrair_resumo(texto: str) -> str | None:
     return m.group(1).strip() if m else None
 
 
+def remover_resumo(texto: str) -> str:
+    """Remove o bloco interno antes de devolver a resposta ao cliente."""
+    limpo = RE_RESUMO.sub("", texto).strip()
+    return re.sub(r"\n\s*-{3,}\s*$", "", limpo).strip()
+
+
 def _secret(nome: str) -> str:
     """Valor de st.secrets (se houver app Streamlit) ou da variável de ambiente."""
     valor = ""
