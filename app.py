@@ -25,7 +25,6 @@ NOME_PROFISSIONAL = _NOME_PARAM or "Ricardo Almeida"
 # --- cor de destaque: adapta o chat à identidade do site onde ele é embutido ---
 # O widget do site passa a cor detectada em ?cor=RRGGBB (com ou sem #). Se não
 # vier, usa um padrão por agente; por último, um tom neutro.
-
 _CORES_PADRAO_AGENTE = {
     "aioti": "#2d8a24",
     "corretor_imoveis": "#2563eb",

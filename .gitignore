@@ -21,6 +21,16 @@ ssh-key-*
 # Claude Code (config local da máquina)
 .claude/settings.local.json
 
+# Perfis de navegador criados pra automação (Supabase, Meta, FazzLeads).
+# Guardam cookie de sessão logada: publicar isso é entregar as contas.
+.codex-*/
+
+# Scripts de operação da VM. Carregam o IP da máquina e o META_VERIFY_TOKEN,
+# e o IP nunca esteve neste repositório público. O passo a passo sem valor
+# nenhum dentro está em deploy/meta-lead-ads.md.
+deploy/subir-meta-lead-ads.ps1
+deploy/ligar-meta-app.ps1
+
 # Contagem diária da cota do Groq (core/cota.py). É estado de execução:
 # muda a cada mensagem e não serve pra ninguém no repositório.
 .cota-groq.json
@@ -28,3 +38,7 @@ ssh-key-*
 # SO
 Thumbs.db
 desktop.ini
+
+# A pagina de servicos e repositorio proprio (publicada no GitHub Pages).
+# Fica fora deste repo, igual as pastas de cliente em portifolio-site/.
+servicos/

@@ -78,3 +78,5 @@ seu PC desligado. Reinicia a VM? O `systemd` sobe o bot sozinho.
 sudo systemctl restart leadiot-bot   # aplicar mudança de chave
 cd ~/agentes && git pull && sudo systemctl restart leadiot-bot   # atualizar o código
 ```
+
+

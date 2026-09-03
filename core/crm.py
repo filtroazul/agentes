@@ -103,7 +103,9 @@ def _primeiro(dados: Any) -> dict[str, Any] | None:
 
 
 def _origem(valor: str) -> str:
-    permitidas = {"site", "whatsapp", "instagram", "telefone", "indicacao", "portal"}
+    permitidas = {
+        "site", "meta_ads", "whatsapp", "instagram", "telefone", "indicacao", "portal"
+    }
     return valor if valor in permitidas else "whatsapp"
 
 
@@ -346,6 +348,202 @@ def configuracao_ia() -> dict[str, Any]:
         "canais": ["whatsapp", "instagram"],
         "mensagem_pausa": "Recebi sua mensagem. O corretor vai continuar o atendimento por aqui.",
     }
+
+
+def preparar_evento_meta(notificacao: dict[str, Any]) -> bool:
+    """Registra uma entrega da Meta e informa se ela deve ser processada.
+
+    Eventos concluidos/ignorados sao idempotentes. Eventos pendentes ou com
+    erro voltam para pendente e incrementam o contador de tentativas.
+    """
+    leadgen_id = str(notificacao.get("leadgen_id") or "").strip()
+    if not leadgen_id:
+        raise CRMErro("Notificacao da Meta sem leadgen_id.")
+    existentes = _rest(
+        "GET",
+        "meta_webhook_eventos",
+        params={"select": "*", "leadgen_id": f"eq.{leadgen_id}", "limit": "1"},
+        servico=True,
+    )
+    existente = _primeiro(existentes)
+    if existente and existente.get("status") in {"processado", "ignorado"}:
+        return False
+
+    base = {
+        "page_id": str(notificacao.get("page_id") or "").strip() or None,
+        "form_id": str(notificacao.get("form_id") or "").strip() or None,
+        "payload": notificacao,
+        "status": "pendente",
+        "ultimo_erro": None,
+        "processado_em": None,
+    }
+    if existente:
+        base["tentativas"] = int(existente.get("tentativas") or 0) + 1
+        _rest(
+            "PATCH",
+            "meta_webhook_eventos",
+            params={"leadgen_id": f"eq.{leadgen_id}"},
+            json=base,
+            servico=True,
+            prefer="return=minimal",
+        )
+        return True
+
+    try:
+        _rest(
+            "POST",
+            "meta_webhook_eventos",
+            json={"leadgen_id": leadgen_id, **base},
+            servico=True,
+            prefer="return=minimal",
+        )
+        return True
+    except CRMErro:
+        # Duas entregas simultaneas podem disputar o indice unico. Se a outra
+        # ja concluiu, esta e apenas um retry; qualquer outra falha continua.
+        repetidos = _rest(
+            "GET",
+            "meta_webhook_eventos",
+            params={"select": "status", "leadgen_id": f"eq.{leadgen_id}", "limit": "1"},
+            servico=True,
+        )
+        repetido = _primeiro(repetidos)
+        if repetido and repetido.get("status") in {"processado", "ignorado"}:
+            return False
+        raise
+
+
+def marcar_evento_meta(
+    leadgen_id: str,
+    status: str,
+    *,
+    lead_id: str | None = None,
+    erro: str | None = None,
+) -> None:
+    if status not in {"processado", "erro", "ignorado"}:
+        raise CRMErro("Status de evento Meta invalido.")
+    agora = _agora()
+    mudancas = {
+        "status": status,
+        "lead_id": lead_id,
+        "ultimo_erro": erro[:1000] if erro else None,
+        "processado_em": agora if status in {"processado", "ignorado"} else None,
+    }
+    _rest(
+        "PATCH",
+        "meta_webhook_eventos",
+        params={"leadgen_id": f"eq.{leadgen_id}"},
+        json=mudancas,
+        servico=True,
+        prefer="return=minimal",
+    )
+
+
+def registrar_lead_meta(dados: dict[str, Any]) -> tuple[dict[str, Any], bool]:
+    """Cria um lead de formulario Meta e sua primeira interacao.
+
+    O telefone nao ativa a IA nem equivale a consentimento para WhatsApp.
+    Retorna (lead, criado_agora).
+    """
+    if not disponivel():
+        raise CRMErro("CRM do webhook nao configurado.")
+    leadgen_id = str(dados.get("leadgen_id") or "").strip()
+    if not leadgen_id:
+        raise CRMErro("Lead da Meta sem leadgen_id.")
+
+    encontrados = _rest(
+        "GET",
+        "leads",
+        params={"select": "*", "leadgen_id": f"eq.{leadgen_id}", "limit": "1"},
+        servico=True,
+    )
+    lead = _primeiro(encontrados)
+    criado = False
+    if not lead:
+        campos_permitidos = {
+            "nome", "telefone", "email", "leadgen_id", "meta_page_id",
+            "meta_form_id", "meta_campaign_id", "meta_campaign_name",
+            "meta_adset_id", "meta_adset_name", "meta_ad_id", "meta_ad_name",
+            "meta_platform", "meta_is_organic", "meta_created_time", "campos_meta",
+            "whatsapp_opt_in", "whatsapp_opt_in_em", "whatsapp_opt_in_fonte",
+        }
+        registro = {chave: dados.get(chave) for chave in campos_permitidos}
+        registro.update(
+            {
+                "nome": str(dados.get("nome") or "").strip()[:120] or None,
+                "telefone": "".join(c for c in str(dados.get("telefone") or "") if c.isdigit()) or None,
+                "email": str(dados.get("email") or "").strip()[:320] or None,
+                "origem": "meta_ads",
+                "canal_id": leadgen_id,
+                "mensagem": str(dados.get("mensagem") or "")[:2000],
+                "status": "novo",
+                "prioridade": 2,
+                "ia_ativa": False,
+                "tags": ["metaads"],
+                "proximo_contato": datetime.now(timezone.utc).date().isoformat(),
+                "ultimo_contato": dados.get("meta_created_time") or _agora(),
+            }
+        )
+        try:
+            criados = _rest(
+                "POST", "leads", json=registro, servico=True, prefer="return=representation"
+            )
+            lead = _primeiro(criados)
+            criado = bool(lead)
+        except CRMErro:
+            # Protecao para duas notificacoes concorrentes do mesmo leadgen_id.
+            encontrados = _rest(
+                "GET",
+                "leads",
+                params={"select": "*", "leadgen_id": f"eq.{leadgen_id}", "limit": "1"},
+                servico=True,
+            )
+            lead = _primeiro(encontrados)
+            if not lead:
+                raise
+
+    if not lead:
+        raise CRMErro("Nao foi possivel criar o lead da Meta.")
+
+    external_id = f"meta-lead:{leadgen_id}"
+    interacoes = _rest(
+        "GET",
+        "lead_interacoes",
+        params={
+            "select": "id", "canal": "eq.meta_ads",
+            "external_id": f"eq.{external_id}", "limit": "1",
+        },
+        servico=True,
+    )
+    mensagem = str(dados.get("mensagem") or "").strip()
+    if not interacoes and mensagem:
+        metadados = {
+            chave: dados.get(chave)
+            for chave in (
+                "leadgen_id", "meta_page_id", "meta_form_id", "meta_campaign_id",
+                "meta_campaign_name", "meta_adset_id", "meta_adset_name",
+                "meta_ad_id", "meta_ad_name", "meta_platform",
+            )
+            if dados.get(chave) is not None
+        }
+        _rest(
+            "POST",
+            "lead_interacoes",
+            json={
+                "lead_id": lead["id"],
+                "tipo": "mensagem",
+                "direcao": "entrada",
+                "autor": "lead",
+                "canal": "meta_ads",
+                "conteudo": mensagem[:4000],
+                "automatico": True,
+                "external_id": external_id,
+                "metadados": metadados,
+            },
+            servico=True,
+            prefer="return=minimal",
+        )
+    return lead, criado
 
 
 def validar_corretor(token: str) -> dict[str, Any]:

@@ -22,6 +22,10 @@ Configuração por variáveis de ambiente (ou .streamlit/secrets.toml):
   SUPABASE_SERVICE_ROLE_KEY        persiste mensagens recebidas no CRM
   CRM_AGENTE        (opcional)     agente ligado ao CRM (padrão: ah_imobiliaria)
   CRM_ALLOWED_ORIGINS (opcional)   origens autorizadas a chamar /crm/sugerir
+  META_VERIFY_TOKEN (Lead Ads)     segredo escolhido para validar o callback
+  META_APP_SECRET   (Lead Ads)     segredo do app; valida X-Hub-Signature-256
+  META_PAGE_ACCESS_TOKEN           token da Page para consultar o leadgen_id
+  META_GRAPH_API_VERSION           versão da Graph API (padrão: v26.0)
   PORT              (opcional)     porta HTTP (padrão: 8000)
 
 Rodar (dev):  python webhook_manychat.py
@@ -30,11 +34,12 @@ Produção:     gunicorn -w 2 -b 0.0.0.0:8000 webhook_manychat:app
 
 import os
 import sys
+import hmac
 from pathlib import Path
 
-from flask import Flask, jsonify, request
+from flask import Flask, Response, jsonify, request
 
-from core import agent, config, crm, leads
+from core import agent, config, crm, leads, meta_leads
 
 SECRETS_TOML = Path(__file__).parent / ".streamlit" / "secrets.toml"
 
@@ -189,7 +194,50 @@ def cabecalhos_cors(resposta):
 
 @app.get("/")
 def saude():
-    return jsonify({"ok": True, "agente": NOME_AGENTE, "crm": crm.disponivel()})
+    return jsonify(
+        {
+            "ok": True,
+            "agente": NOME_AGENTE,
+            "crm": crm.disponivel(),
+            "meta_leads": meta_leads.configurado(),
+        }
+    )
+
+
+@app.get("/meta/lead-ads")
+def verificar_webhook_meta():
+    """Handshake exigido ao cadastrar o callback no painel da Meta."""
+    modo = request.args.get("hub.mode", "")
+    recebido = request.args.get("hub.verify_token", "")
+    desafio = request.args.get("hub.challenge", "")
+    esperado = os.environ.get("META_VERIFY_TOKEN", "").strip()
+    if not esperado:
+        return jsonify({"error": "meta_not_configured"}), 503
+    if modo == "subscribe" and hmac.compare_digest(recebido, esperado) and desafio:
+        return Response(desafio, status=200, mimetype="text/plain")
+    return jsonify({"error": "verification_failed"}), 403
+
+
+@app.post("/meta/lead-ads")
+def receber_webhook_meta():
+    """Recebe Lead Ads, valida a assinatura e persiste antes de confirmar."""
+    corpo = request.get_data(cache=True)
+    assinatura = request.headers.get("X-Hub-Signature-256", "")
+    if not os.environ.get("META_APP_SECRET", "").strip():
+        return jsonify({"error": "meta_not_configured"}), 503
+    if not meta_leads.assinatura_valida(corpo, assinatura):
+        return jsonify({"error": "invalid_signature"}), 401
+    dados = request.get_json(silent=True)
+    if not isinstance(dados, dict):
+        return jsonify({"error": "invalid_payload"}), 400
+    try:
+        contagens = meta_leads.processar_payload(dados)
+    except meta_leads.MetaErro as erro:
+        # Sem payload, token ou PII no log. O 500 faz a Meta tentar novamente;
+        # meta_webhook_eventos impede duplicacao durante o retry.
+        print("Falha no webhook Meta Lead Ads:", erro)
+        return jsonify({"received": False, "error": "processing_failed"}), 500
+    return jsonify({"received": True, **contagens})
 
 
 @app.post("/crm/sugerir")
