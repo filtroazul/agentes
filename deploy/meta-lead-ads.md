@@ -26,18 +26,47 @@ As referências oficiais usadas foram o
 a [classe Lead do Business SDK](https://github.com/facebook/facebook-python-business-sdk/blob/main/facebook_business/adobjects/lead.py)
 e a [documentação de Webhooks](https://developers.facebook.com/docs/graph-api/webhooks/getting-started/webhooks-for-leadgen/).
 
-## Onde isto parou (03/set)
+## Estado final em 04/set
 
-Passos 1 e 2 **feitos e conferidos**. Falta o 3, que depende da conta do
-Alejandro no Facebook.
+Banco e backend estão prontos. No app da Meta, a Callback URL foi validada,
+o objeto **Page** foi selecionado e o campo **leadgen** ficou em **Assinado**.
+FazzLeads, WhatsApp e campanhas continuam intactos.
 
 A ordem não é opcional: o painel da Meta valida a Callback URL no momento em
 que você salva. Sem o passo 2 o endpoint responde 404 e a Meta recusa o
 cadastro — foi exatamente onde a primeira tentativa travou.
 
-Nesta fase o health responde `meta_leads:false` de propósito: `configurado()`
-exige App Secret e token da Página. O handshake, que só usa o
-`META_VERIFY_TOKEN`, já funciona e é o que a Meta checa pra aceitar a URL.
+O health agora responde `meta_leads:true`. App Secret e token da Página estão
+no env protegido da VM, nunca em arquivo local ou Git. A Graph API confirmou:
+
+- `leads_retrieval`, `pages_show_list`, `pages_read_engagement`,
+  `pages_manage_metadata` e `business_management` concedidos;
+- o app inscrito na Página AH Imóveis com `leadgen`;
+- a assinatura Page/`leadgen` ativa no app e a Callback URL correta.
+
+O teste assinado completo passou: o backend recuperou o lead sintético na
+Graph API, gravou o evento como `processado`, criou exatamente um lead
+`meta_ads` e ignorou a repetição sem duplicar.
+
+O teste oficial em **Webhooks → Page → leadgen → Teste** também passou: a Meta
+enviou um POST real, o endpoint respondeu HTTP 200 e o evento foi corretamente
+marcado como `ignorado`, porque o payload de exemplo usa uma Page fictícia.
+Isso valida a entrega Meta → endpoint. O teste precisou ser aberto em uma sessão
+limpa porque uma extensão do Brave bloqueava o carregamento dos dados de
+exemplo.
+
+O app **AH Imoveis Leads CRM** foi publicado depois do cadastro das páginas
+legais públicas, domínio e ícone exigidos pela Meta. Em seguida, foi excluído o
+lead sintético antigo e criado outro pela ferramenta oficial no formulário real
+da Página AH Imóveis. A Meta marcou `Success` tanto para o app próprio quanto
+para o LeadConnector/FazzLeads.
+
+No backend, esse novo evento ficou `processado` na primeira tentativa, sem erro,
+com Page e formulário corretos. No Supabase foi criada exatamente uma linha em
+`leads`, com origem `meta_ads`. Isso valida o caminho completo Meta → webhook →
+Graph API → Supabase → CRM já com o app público. FazzLeads, WhatsApp e campanhas
+continuam intactos; manter os dois captadores em paralelo durante a conferência
+operacional.
 
 ## 1. Aplicar o banco
 
@@ -103,10 +132,10 @@ a Página, a conta de anúncios e os formulários. Não remover a FazzLeads.
 
 No app em `developers.facebook.com`:
 
-1. adicionar o produto **Webhooks**;
-2. escolher o objeto **Page** e o campo **leadgen**;
-3. usar como Callback URL `https://SEU-DOMINIO/meta/lead-ads`;
-4. informar exatamente o mesmo `META_VERIFY_TOKEN` da VM;
+1. ✅ adicionar o produto **Webhooks**;
+2. ✅ escolher o objeto **Page** e o campo **leadgen**;
+3. ✅ usar como Callback URL `https://SEU-DOMINIO/meta/lead-ads`;
+4. ✅ informar exatamente o mesmo `META_VERIFY_TOKEN` da VM;
 5. gerar um token autorizado para recuperar leads da Página;
 6. garantir `leads_retrieval` e a permissão necessária para gerenciar a
    assinatura da Página (`pages_manage_metadata`); a Meta pode exigir revisão
@@ -114,9 +143,9 @@ No app em `developers.facebook.com`:
 7. assinar o app na Página para `leadgen`;
 8. testar com a ferramenta de teste de formulário da própria Meta.
 
-Em modo de desenvolvimento, leads reais de pessoas fora dos papéis do app
-podem não ser entregues. A ativação pública depende das permissões e da revisão
-mostradas no painel do app.
+O app está publicado. Se um novo formulário ou uma nova Página for usado, será
+necessário adicioná-lo aos filtros da VM e assinar essa Página em `leadgen` antes
+de esperar a entrega.
 
 ## 4. Regra do consentimento
 
