@@ -26,6 +26,19 @@ As referências oficiais usadas foram o
 a [classe Lead do Business SDK](https://github.com/facebook/facebook-python-business-sdk/blob/main/facebook_business/adobjects/lead.py)
 e a [documentação de Webhooks](https://developers.facebook.com/docs/graph-api/webhooks/getting-started/webhooks-for-leadgen/).
 
+## Onde isto parou (03/set)
+
+Passos 1 e 2 **feitos e conferidos**. Falta o 3, que depende da conta do
+Alejandro no Facebook.
+
+A ordem não é opcional: o painel da Meta valida a Callback URL no momento em
+que você salva. Sem o passo 2 o endpoint responde 404 e a Meta recusa o
+cadastro — foi exatamente onde a primeira tentativa travou.
+
+Nesta fase o health responde `meta_leads:false` de propósito: `configurado()`
+exige App Secret e token da Página. O handshake, que só usa o
+`META_VERIFY_TOKEN`, já funciona e é o que a Meta checa pra aceitar a URL.
+
 ## 1. Aplicar o banco
 
 No SQL Editor do projeto `ah.imobiliaria`, execute inteiro:
