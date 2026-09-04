@@ -18,7 +18,9 @@ import requests
 
 # Bloco de resumo que o agente emite no fim da qualificação (ver agents.yaml).
 RE_RESUMO = re.compile(
-    r"-{3,}\s*\n\s*((?:📋\s*)?RESUMO[^\n]*.*?)(?:\n\s*-{3,}|\Z)", re.DOTALL
+    r"(?:^\s*-{3,}\s*$\s*)?^\s*((?:📋\s*)?RESUMO[^\n]*.*?)"
+    r"(?:^\s*-{3,}\s*$|\Z)",
+    re.DOTALL | re.MULTILINE | re.IGNORECASE,
 )
 
 

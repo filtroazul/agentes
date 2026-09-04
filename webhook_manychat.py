@@ -21,7 +21,7 @@ Configuração por variáveis de ambiente (ou .streamlit/secrets.toml):
   SUPABASE_URL + SUPABASE_ANON_KEY valida a sessão do corretor no botão sugerir
   SUPABASE_SERVICE_ROLE_KEY        persiste mensagens recebidas no CRM
   CRM_AGENTE        (opcional)     agente ligado ao CRM (padrão: ah_imobiliaria)
-  CRM_ALLOWED_ORIGINS (opcional)   origens autorizadas a chamar /crm/sugerir
+  CRM_ALLOWED_ORIGINS (opcional)   origens autorizadas a chamar rotas /crm
   META_VERIFY_TOKEN (Lead Ads)     segredo escolhido para validar o callback
   META_APP_SECRET   (Lead Ads)     segredo do app; valida X-Hub-Signature-256
   META_PAGE_ACCESS_TOKEN           token da Page para consultar o leadgen_id
@@ -162,7 +162,11 @@ SEGREDO = os.environ.get("WEBHOOK_SECRET", "").strip()
 AGENTE_CRM = os.environ.get("CRM_AGENTE", "ah_imobiliaria").strip()
 ORIGENS_CRM = {
     item.strip()
-    for item in os.environ.get("CRM_ALLOWED_ORIGINS", "https://filtroazul.github.io,http://127.0.0.1:8720,http://localhost:8720").split(",")
+    for item in os.environ.get(
+        "CRM_ALLOWED_ORIGINS",
+        "https://ah-imobiliaria.vercel.app,https://filtroazul.github.io,"
+        "http://127.0.0.1:8720,http://localhost:8720",
+    ).split(",")
     if item.strip()
 }
 
@@ -290,6 +294,69 @@ def sugerir_resposta_crm():
     if not sugestao:
         return jsonify({"error": "A IA nao devolveu uma resposta aproveitavel."}), 502
     return jsonify({"sugestao": sugestao, "lead_id": lead.get("id")})
+
+
+@app.post("/crm/testar-chat")
+def testar_chat_crm():
+    """Conversa isolada para o corretor validar o agente sem tocar nos canais.
+
+    O histórico vem do navegador e não é persistido. Esta rota não cria lead,
+    não escreve em lead_interacoes e não envia mensagem ao WhatsApp/ManyChat.
+    """
+    autorizacao = request.headers.get("Authorization", "")
+    token = autorizacao.removeprefix("Bearer ").strip()
+    dados = request.get_json(silent=True) or {}
+    mensagem = str(dados.get("mensagem", "")).strip()
+    if not token:
+        return jsonify({"error": "Sessao obrigatoria."}), 401
+    if not mensagem:
+        return jsonify({"error": "Digite uma mensagem para testar."}), 400
+    if len(mensagem) > 2000:
+        return jsonify({"error": "A mensagem de teste e muito longa."}), 400
+
+    try:
+        crm.validar_corretor(token)
+    except crm.CRMErro as erro:
+        return jsonify({"error": str(erro)}), 401
+
+    if AGENTE_CRM not in _agentes:
+        return jsonify({"error": "O agente da imobiliaria nao esta configurado."}), 503
+
+    historico_recebido = dados.get("historico", [])
+    if not isinstance(historico_recebido, list):
+        return jsonify({"error": "Historico de teste invalido."}), 400
+    historico = []
+    for item in historico_recebido[-MAX_HISTORICO:]:
+        if not isinstance(item, dict) or item.get("role") not in ("user", "assistant"):
+            continue
+        conteudo = str(item.get("content", "")).strip()
+        if conteudo:
+            historico.append({"role": item["role"], "content": conteudo[:2000]})
+    historico.append({"role": "user", "content": mensagem})
+
+    cfg_exec = dict(_agentes[AGENTE_CRM])
+    cfg_exec["prompt"] = cfg_exec.get("prompt", "") + (
+        "\n\n# Ambiente de teste isolado\n"
+        "Esta conversa simula um cliente no WhatsApp, mas nao esta conectada a "
+        "nenhum numero real. Responda normalmente como responderia ao cliente."
+    )
+    try:
+        resposta = agent.responder(API_KEY, cfg_exec, historico)
+    except Exception as erro:
+        print("Erro no teste isolado do CRM:", erro)
+        return jsonify({"error": "A IA nao conseguiu responder ao teste agora."}), 502
+
+    resposta_cliente = leads.remover_resumo(resposta)
+    if not resposta_cliente:
+        return jsonify({"error": "A IA nao devolveu uma resposta aproveitavel."}), 502
+    return jsonify(
+        {
+            "resposta": resposta_cliente,
+            "isolado": True,
+            "persistido": False,
+            "enviado_ao_whatsapp": False,
+        }
+    )
 
 
 @app.post("/manychat/<agente_nome>")

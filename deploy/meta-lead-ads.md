@@ -182,7 +182,20 @@ order by atualizado_em;
 5. só planejar a retirada do FazzLeads depois de 100% de correspondência na
    captura e depois de identificar o provedor do módulo `WhatsApp Alejandro`.
 
-## 6. Testes locais
+## 6. Testar o chatbot sem tocar no WhatsApp
+
+No painel publicado, abra **Leads e funil → Atendimento com IA → Testar
+chatbot**. A rota autenticada `POST /crm/testar-chat` usa o agente real e o
+catálogo, mas não persiste histórico, não cria lead e não possui envio para
+WhatsApp, ManyChat ou FazzLeads. O botão **Nova conversa** limpa o contexto; um
+recarregamento da página também apaga tudo.
+
+Esse teste valida o cérebro, não o canal. Para o atendimento aparecer no número
+real ainda será necessário conectar a WhatsApp Business Platform, receber as
+mensagens por webhook e enviar as respostas pela API oficial. Não desconectar o
+FazzLeads antes de validar a opção de coexistência ou uma migração controlada.
+
+## 7. Testes locais
 
 ```bash
 python -m unittest discover -s tests -p "test_*meta*.py" -v
