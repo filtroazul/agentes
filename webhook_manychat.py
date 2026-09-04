@@ -26,6 +26,13 @@ Configuração por variáveis de ambiente (ou .streamlit/secrets.toml):
   META_APP_SECRET   (Lead Ads)     segredo do app; valida X-Hub-Signature-256
   META_PAGE_ACCESS_TOKEN           token da Page para consultar o leadgen_id
   META_GRAPH_API_VERSION           versão da Graph API (padrão: v26.0)
+  WHATSAPP_VERIFY_TOKEN            segredo de verificação do webhook WhatsApp
+  WHATSAPP_APP_SECRET              segredo do app para validar a assinatura
+  WHATSAPP_ACCESS_TOKEN            token da WhatsApp Cloud API
+  WHATSAPP_PHONE_NUMBER_ID         ID do número remetente na Cloud API
+  WHATSAPP_AUTOMATION_ENABLED      true somente durante teste/operação
+  WHATSAPP_TEST_RECIPIENTS         números autorizados, separados por vírgula
+  WHATSAPP_ALLOW_ALL               true somente depois da homologação
   PORT              (opcional)     porta HTTP (padrão: 8000)
 
 Rodar (dev):  python webhook_manychat.py
@@ -39,7 +46,7 @@ from pathlib import Path
 
 from flask import Flask, Response, jsonify, request
 
-from core import agent, config, crm, leads, meta_leads
+from core import agent, config, crm, leads, meta_leads, whatsapp_cloud
 
 SECRETS_TOML = Path(__file__).parent / ".streamlit" / "secrets.toml"
 
@@ -204,6 +211,8 @@ def saude():
             "agente": NOME_AGENTE,
             "crm": crm.disponivel(),
             "meta_leads": meta_leads.configurado(),
+            "whatsapp_cloud": whatsapp_cloud.configurado(),
+            "whatsapp_automation": whatsapp_cloud.ativo(),
         }
     )
 
@@ -242,6 +251,153 @@ def receber_webhook_meta():
         print("Falha no webhook Meta Lead Ads:", erro)
         return jsonify({"received": False, "error": "processing_failed"}), 500
     return jsonify({"received": True, **contagens})
+
+
+@app.get("/whatsapp")
+def verificar_webhook_whatsapp():
+    """Handshake do webhook da WhatsApp Cloud API."""
+    modo = request.args.get("hub.mode", "")
+    recebido = request.args.get("hub.verify_token", "")
+    desafio = request.args.get("hub.challenge", "")
+    esperado = os.environ.get("WHATSAPP_VERIFY_TOKEN", "").strip()
+    if not esperado:
+        return jsonify({"error": "whatsapp_not_configured"}), 503
+    if modo == "subscribe" and hmac.compare_digest(recebido, esperado) and desafio:
+        return Response(desafio, status=200, mimetype="text/plain")
+    return jsonify({"error": "verification_failed"}), 403
+
+
+def _processar_mensagem_whatsapp(mensagem: dict[str, str]) -> str:
+    """Persiste, responde e torna retries da Meta seguros contra envio duplicado."""
+    remetente = mensagem["de"]
+    external_id = mensagem["id"]
+    texto = mensagem.get("texto", "").strip()
+    if not texto:
+        return "unsupported"
+
+    phone_id_recebido = mensagem.get("phone_number_id", "")
+    phone_id_esperado = os.environ.get("WHATSAPP_PHONE_NUMBER_ID", "").strip()
+    if phone_id_esperado and phone_id_recebido != phone_id_esperado:
+        return "wrong_phone"
+    if not whatsapp_cloud.remetente_permitido(remetente):
+        return "not_allowed"
+
+    lead_crm, mensagem_nova = crm.registrar_entrada(
+        canal_id=remetente,
+        origem="whatsapp",
+        texto=texto,
+        external_id=external_id,
+        nome=mensagem.get("nome") or None,
+        telefone=remetente,
+    )
+    resposta_id = f"{external_id}:reply"
+
+    # Se o envio anterior concluiu, apenas confirma novamente o webhook. Se a
+    # resposta foi salva mas o envio falhou, reutiliza o mesmo texto no retry.
+    if not mensagem_nova:
+        anterior = crm.interacao_por_external_id("whatsapp", resposta_id)
+        if anterior:
+            metadados = anterior.get("metadados") or {}
+            if metadados.get("status_envio") == "enviado":
+                return "duplicate"
+            try:
+                wamid = whatsapp_cloud.enviar_texto(remetente, anterior["conteudo"])
+            except whatsapp_cloud.WhatsAppErro:
+                crm.atualizar_metadados_interacao(
+                    "whatsapp", resposta_id, {**metadados, "status_envio": "erro"}
+                )
+                raise
+            try:
+                crm.atualizar_metadados_interacao(
+                    "whatsapp",
+                    resposta_id,
+                    {**metadados, "status_envio": "enviado", "wamid": wamid},
+                )
+            except crm.CRMErro:
+                # O WhatsApp ja aceitou a mensagem. Nao pede retry para evitar
+                # uma segunda resposta ao cliente.
+                print("Aviso: envio WhatsApp concluido, mas status nao foi atualizado.")
+            return "retried"
+
+    config_ia = crm.configuracao_ia()
+    canais = config_ia.get("canais") or []
+    pode_responder = (
+        config_ia.get("modo") == "automatico"
+        and lead_crm.get("ia_ativa", True)
+        and "whatsapp" in canais
+    )
+    if not pode_responder:
+        return "handoff"
+    if AGENTE_CRM not in _agentes:
+        raise RuntimeError("Agente do CRM nao configurado.")
+
+    historico = crm.historico_do_lead(lead_crm["id"], limite=MAX_HISTORICO)
+    resposta = agent.responder(API_KEY, dict(_agentes[AGENTE_CRM]), historico)
+    resumo = leads.extrair_resumo(resposta)
+    resposta_cliente = leads.remover_resumo(resposta) or (
+        "Perfeito. O corretor vai continuar o atendimento por aqui."
+    )
+    metadados = {"status_envio": "preparado", "mensagem_entrada_id": external_id}
+    crm.registrar_saida(
+        lead_crm["id"],
+        resposta_cliente,
+        canal="whatsapp",
+        external_id=resposta_id,
+        automatico=True,
+        metadados=metadados,
+    )
+    if resumo:
+        crm.atualizar_resumo(lead_crm["id"], resumo)
+
+    try:
+        wamid = whatsapp_cloud.enviar_texto(remetente, resposta_cliente)
+    except whatsapp_cloud.WhatsAppErro:
+        crm.atualizar_metadados_interacao(
+            "whatsapp", resposta_id, {**metadados, "status_envio": "erro"}
+        )
+        raise
+    try:
+        crm.atualizar_metadados_interacao(
+            "whatsapp",
+            resposta_id,
+            {**metadados, "status_envio": "enviado", "wamid": wamid},
+        )
+    except crm.CRMErro:
+        print("Aviso: envio WhatsApp concluido, mas status nao foi atualizado.")
+
+    # Um teste controlado nao deve disparar alerta de novo lead para a equipe.
+    if resumo and not whatsapp_cloud.modo_teste(remetente):
+        leads.enviar_lead(AGENTE_CRM, resumo)
+    return "sent"
+
+
+@app.post("/whatsapp")
+def receber_webhook_whatsapp():
+    """Recebe mensagens oficiais; permanece inerte ate a ativacao explicita."""
+    corpo = request.get_data(cache=True)
+    assinatura = request.headers.get("X-Hub-Signature-256", "")
+    if not whatsapp_cloud.assinatura_valida(corpo, assinatura):
+        return jsonify({"error": "invalid_signature"}), 401
+    dados = request.get_json(silent=True)
+    if not isinstance(dados, dict):
+        return jsonify({"error": "invalid_payload"}), 400
+    mensagens = whatsapp_cloud.extrair_mensagens(dados)
+    if not mensagens:
+        return jsonify({"received": True, "processed": 0})
+    if not whatsapp_cloud.ativo():
+        return jsonify({"received": True, "processed": 0, "inactive": True})
+    if not crm.disponivel():
+        return jsonify({"received": False, "error": "crm_unavailable"}), 503
+
+    resultados = []
+    try:
+        for mensagem in mensagens:
+            resultados.append(_processar_mensagem_whatsapp(mensagem))
+    except Exception as erro:
+        print("Falha controlada no webhook WhatsApp:", type(erro).__name__)
+        return jsonify({"received": False, "error": "processing_failed"}), 500
+    processadas = resultados.count("sent") + resultados.count("retried")
+    return jsonify({"received": True, "processed": processadas})
 
 
 @app.post("/crm/sugerir")

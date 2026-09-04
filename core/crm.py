@@ -217,6 +217,7 @@ def registrar_saida(
     canal: str,
     external_id: str | None = None,
     automatico: bool = True,
+    metadados: dict[str, Any] | None = None,
 ) -> None:
     agora = _agora()
     _rest(
@@ -231,6 +232,7 @@ def registrar_saida(
             "conteudo": texto[:4000],
             "automatico": automatico,
             "external_id": external_id,
+            "metadados": metadados or {},
         },
         servico=True,
         prefer="return=minimal",
@@ -267,6 +269,37 @@ def resposta_por_external_id(canal: str, external_id: str) -> str | None:
     )
     item = _primeiro(dados)
     return item.get("conteudo") if item else None
+
+
+def interacao_por_external_id(canal: str, external_id: str) -> dict[str, Any] | None:
+    dados = _rest(
+        "GET",
+        "lead_interacoes",
+        params={
+            "select": "id,lead_id,conteudo,metadados",
+            "canal": f"eq.{_origem(canal)}",
+            "external_id": f"eq.{external_id}",
+            "limit": "1",
+        },
+        servico=True,
+    )
+    return _primeiro(dados)
+
+
+def atualizar_metadados_interacao(
+    canal: str, external_id: str, metadados: dict[str, Any]
+) -> None:
+    _rest(
+        "PATCH",
+        "lead_interacoes",
+        params={
+            "canal": f"eq.{_origem(canal)}",
+            "external_id": f"eq.{external_id}",
+        },
+        json={"metadados": metadados},
+        servico=True,
+        prefer="return=minimal",
+    )
 
 
 def registrar_erro(lead_id: str, texto: str, *, canal: str) -> None:
