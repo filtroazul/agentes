@@ -190,6 +190,11 @@ catálogo, mas não persiste histórico, não cria lead e não possui envio para
 WhatsApp, ManyChat ou FazzLeads. O botão **Nova conversa** limpa o contexto; um
 recarregamento da página também apaga tudo.
 
+O agente usa `openai/gpt-oss-120b`. O antigo
+`llama-3.3-70b-versatile` foi retirado pela Groq do plano free/developer em
+16/08/2026 e passou a responder 404; a cadeia de reserva agora contém somente
+modelos ativos e também trata retirada de modelo sem derrubar o atendimento.
+
 Esse teste valida o cérebro, não o canal. Para o atendimento aparecer no número
 real ainda será necessário conectar a WhatsApp Business Platform, receber as
 mensagens por webhook e enviar as respostas pela API oficial. Não desconectar o

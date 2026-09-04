@@ -4,7 +4,7 @@ quando solicitado e repete até obter a resposta final."""
 import json
 import re
 
-from groq import BadRequestError, Groq, RateLimitError
+from groq import BadRequestError, Groq, NotFoundError, RateLimitError
 
 from core import cota, tools
 
@@ -15,25 +15,14 @@ MAX_ITERACOES = 8  # proteção contra loops infinitos de ferramentas
 # modelo é cota nova de verdade — e é o que os termos do Groq permitem, ao
 # contrário de abrir uma segunda conta.
 #
-# ⚠️ A ordem saiu de MEDIÇÃO, não de tamanho de modelo. Eu tinha assumido
-# "maior = melhor" e estava errado: numa bateria com o prompt do ah_imobiliaria
-# (11/08/2026, catálogo vazio), o gpt-oss-120b foi o PIOR dos três — respondeu
-# "Qual é seu nome?" a quem pediu apartamento de 2 quartos até 300 mil,
-# ignorando a pergunta inteira. O llama-3.1-8b foi o único que respondeu as
-# três perguntas empilhadas de "tem casa no Montese? aceita financiamento?
-# qual o valor?", que é o teste mais duro do prompt.
-#
-# O 8b vem em segundo também por cota: 500 mil tokens/dia contra 200 mil dos
-# gpt-oss, ou seja, é ele que aguenta o tranco por mais tempo.
-#
-# ⚠️ Ressalva honesta: foram 4 perguntas, uma rodada cada, e o llama-3.3-70b
-# estava com a cota estourada e NÃO entrou na comparação. Se for mover agente
-# de modelo pra valer, refazer a bateria com mais volume.
+# Em 16/08/2026 o Groq retirou os dois Llama abaixo do plano free/developer.
+# A cadeia usa somente os substitutos de produção recomendados na página de
+# deprecações. NotFound também cai para a próxima opção para uma retirada de
+# modelo não derrubar todos os atendimentos outra vez.
 CADEIA_RESERVA = [
-    "llama-3.3-70b-versatile",
-    "llama-3.1-8b-instant",
-    "openai/gpt-oss-20b",
     "openai/gpt-oss-120b",
+    "qwen/qwen3.6-27b",
+    "openai/gpt-oss-20b",
 ]
 
 
@@ -111,9 +100,9 @@ def _chamar(client, cadeia, atual, conversa, schemas, config_agente, nome_agente
                 tool_choice="auto" if schemas else None,
                 max_tokens=2048,
             )
-        except RateLimitError as erro:
+        except (RateLimitError, NotFoundError) as erro:
             ultimo_erro = erro
-            diario = _e_teto_diario(erro)
+            diario = isinstance(erro, RateLimitError) and _e_teto_diario(erro)
             proximo = cadeia[atual + 1] if atual + 1 < len(cadeia) else None
             if proximo and diario:
                 cota.avisar_queda(modelo, proximo, nome_agente)
@@ -139,7 +128,7 @@ def responder(api_key: str, config_agente: dict, mensagens: list[dict]) -> str:
     client = Groq(api_key=api_key)
 
     nome_agente = config_agente.get("titulo_demo") or config_agente.get("descricao", "?")
-    cadeia = _cadeia(config_agente.get("modelo", "llama-3.3-70b-versatile"))
+    cadeia = _cadeia(config_agente.get("modelo", "openai/gpt-oss-120b"))
     # Índice na cadeia. Fica FORA do laço de propósito: uma vez que o modelo
     # caiu por cota, ele segue caído pelo resto desta resposta — voltar a
     # tentá-lo a cada iteração só gastaria 429 e tempo.

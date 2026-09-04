@@ -9,7 +9,7 @@ ARQUIVO_CONFIG = Path(__file__).parent.parent / "agents.yaml"
 CONFIG_PADRAO = {
     "icone": "🤖",
     "descricao": "Novo agente",
-    "modelo": "llama-3.3-70b-versatile",
+    "modelo": "openai/gpt-oss-120b",
     "temperatura": 0.7,
     "ferramentas": [],
     "prompt": "Você é um assistente útil. Responda em português do Brasil.",

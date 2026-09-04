@@ -765,7 +765,7 @@ agentes:
     descricao: Atendimento da Ah Imobiliária, consultando o catálogo real via Supabase
     titulo_demo: Atendimento Ah Imobiliária
     subtitulo_demo: Compra, venda e aluguel em Fortaleza e região. Me conta o que você procura.
-    modelo: llama-3.3-70b-versatile
+    modelo: openai/gpt-oss-120b
     temperatura: 0.4
     ferramentas:
     - buscar_imoveis

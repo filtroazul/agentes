@@ -26,10 +26,8 @@ from pathlib import Path
 # Tetos de tokens/dia do plano grátis (console.groq.com/docs/rate-limits,
 # conferido em 11/08/2026). Modelo fora desta tabela não é contabilizado.
 TETO_DIARIO = {
-    "llama-3.3-70b-versatile": 100_000,
     "openai/gpt-oss-120b": 200_000,
     "openai/gpt-oss-20b": 200_000,
-    "llama-3.1-8b-instant": 500_000,
 }
 
 # A partir de quanto do teto avisar. 0.8 dá margem pra reagir antes de cair.
