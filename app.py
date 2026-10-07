@@ -118,13 +118,19 @@ st.set_page_config(
 )
 
 
-def obter_api_key_configurada() -> str:
-    """Chave do deploy (st.secrets) ou do ambiente local (GROQ_API_KEY)."""
-    try:
-        chave = st.secrets.get("GROQ_API_KEY", "")
-    except Exception:  # sem secrets.toml configurado
-        chave = ""
-    return chave or os.environ.get("GROQ_API_KEY", "")
+def obter_api_key_configurada(agente: str = "") -> str:
+    """Prefere a credencial do agente; preserva a chave global como alternativa."""
+    nomes = [f"GROQ_API_KEY_{agente.upper()}"] if agente else []
+    nomes.append("GROQ_API_KEY")
+    for nome in nomes:
+        try:
+            chave = st.secrets.get(nome, "")
+        except Exception:  # sem secrets.toml configurado
+            chave = ""
+        chave = (chave or os.environ.get(nome, "")).strip()
+        if chave:
+            return chave
+    return ""
 
 MODELOS_DISPONIVEIS = [
     "llama-3.3-70b-versatile",
@@ -411,22 +417,13 @@ if MODO_DEMO:
         st.error("Assistente não encontrado. Confira o link recebido.")
         st.stop()
     selecionado = AGENTE_DEMO
-    api_key = obter_api_key_configurada()
+    api_key = obter_api_key_configurada(selecionado)
 
 # --- barra lateral (modo admin): chave, seleção e configuração -----------------
 
 if not MODO_DEMO:
   with st.sidebar:
     st.title("✦ Plataforma de Agentes")
-
-    api_key = st.text_input(
-        "Chave da API Groq",
-        value=obter_api_key_configurada(),
-        type="password",
-        help="Crie uma chave gratuita em https://console.groq.com/keys",
-    )
-
-    st.divider()
 
     nomes = list(agentes.keys())
     if not nomes:
@@ -438,6 +435,16 @@ if not MODO_DEMO:
             nomes,
             format_func=lambda n: f"{agentes[n].get('icone', '🤖')}  {n}",
         )
+
+    api_key = st.text_input(
+        "Chave da API Groq",
+        value=obter_api_key_configurada(selecionado or ""),
+        key=f"groq-key-{selecionado or 'global'}",
+        type="password",
+        help="Crie uma chave gratuita em https://console.groq.com/keys",
+    )
+
+    st.divider()
 
     # Criar novo agente
     with st.expander("➕ Novo agente"):
