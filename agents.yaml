@@ -92,7 +92,7 @@ agentes:
     descricao: Qualificador de leads da AIOTI Soluções Industriais (automação, IoT, energia)
     titulo_demo: Atendimento AIOTI
     subtitulo_demo: Soluções industriais com resposta imediata. Me conta o que sua operação precisa.
-    modelo: llama-3.3-70b-versatile
+    modelo: openai/gpt-oss-120b
     temperatura: 0.4
     ferramentas:
     - calculadora
